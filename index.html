@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Грибной тренажер: Род существительных</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+
+  <!-- Оптимизированный фон -->
+  <div class="forest-bg">
+    <div class="sunbeams"></div>
+    <div class="firefly"></div>
+    <div class="firefly"></div>
+    <div class="firefly"></div>
+  </div>
+
+  <!-- Шапка -->
+  <header class="app-header">
+    <h1>🌲 Лесная Поляна: Род Существительных 🌲</h1>
+    <div class="progress-container">
+      <div id="progress-bar" class="progress-bar"></div>
+    </div>
+  </header>
+
+  <!-- Игровое поле -->
+  <main id="game-field" class="game-field"></main>
+
+  <!-- Ошибка -->
+  <div id="error-cross" class="error-cross hidden">✖</div>
+
+  <!-- Победа (на «Вы») -->
+  <div id="victory-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2>🎉 Великолепно! 🎉</h2>
+      <p>Вы успешно отсортировали все 50 грибов по корзинкам!</p>
+      <button id="restart-btn" onclick="initGame()">Сыграть еще раз</button>
+    </div>
+  </div>
+
+  <!-- Корзины -->
+  <div class="baskets-container">
+    <div id="basket-1" class="basket-item fem-basket" data-basket="1">
+      <div class="basket-counter" id="score-1">0</div>
+      <div class="basket-label">Женский род</div>
+      <div class="basket-body">
+        <div class="basket-weave"></div>
+        <div class="basket-rim"></div>
+      </div>
+    </div>
+
+    <div id="basket-2" class="basket-item masc-basket" data-basket="2">
+      <div class="basket-counter" id="score-2">0</div>
+      <div class="basket-label">Мужской род</div>
+      <div class="basket-body">
+        <div class="basket-weave"></div>
+        <div class="basket-rim"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
