@@ -229,7 +229,7 @@ body {
   letter-spacing: 0.2px;
 }
 
-/* Корзины — строго по центру */
+/* КОРЗИНЫ: Увеличен отступ gap до 140px для шикарного размещения по бокам */
 .baskets-container {
   position: absolute;
   bottom: 0;
@@ -239,7 +239,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  gap: 40px;
+  gap: 140px; /* <--- КОРЗИНЫ ОТОДВИНУТЫ ДРУГ ОТ ДРУГА */
   padding: 0 10px 12px 10px;
   z-index: 200;
   pointer-events: none;
@@ -337,7 +337,7 @@ body {
   border-radius: 6px 6px 0 0;
 }
 
-/* ИСПРАВЛЕННЫЙ ЦЕНТР ДЛЯ ТЕКСТА СКЛОНЕНИЙ */
+/* НАДПИСИ СКЛОНЕНИЙ СТРОГО ПО ЦЕНТРУ КОРЗИНЫ */
 .basket-label {
   color: #ffb703;
   font-weight: 900;
