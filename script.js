@@ -1,13 +1,15 @@
 const list1 = [
   "Мама", "Парусина", "Вода", "Земля", "Книга", "Школа", "Страна", "Весна", "Зима", "Гора",
   "Стена", "Трава", "Семья", "Баня", "Дорога", "Липа", "Улыбка", "Муха", "Ракета", "Папа",
-  "Дедушка", "Дядя", "Мужчина", "Юноша", "Судья"
+  "Дедушка", "Дядя", "Мужчина", "Юноша", "Судья",
+  "Звезда", "Река", "Тропа", "Луна", "Туча", "Тетрадь", "Птица", "Рыба", "Шляпа", "Тропинка", "Ладонь", "Капля"
 ];
 
 const list2 = [
   "Стол", "Дом", "Конь", "Стул", "Трамвай", "Дуб", "Ветер", "Завод", "Врач", "Дождь",
   "Окно", "Солнце", "Небо", "Молоко", "Поле", "Море", "Здание", "Блюдце", "Письмо", "Яблоко",
-  "Дерево", "Озеро", "Лето", "Утро", "Животное"
+  "Дерево", "Озеро", "Лето", "Утро", "Животное",
+  "Гриб", "Лес", "Пень", "Город", "Забор", "Мост", "Огонь", "Цветок", "Брат", "Камень"
 ];
 
 let score1 = 0;
@@ -35,32 +37,39 @@ function initGame() {
   const allWords = [
     ...list1.map(word => ({ word, target: 1 })),
     ...list2.map(word => ({ word, target: 2 }))
-  ].sort(() => Math.random() - 0.5);
+  ];
 
   const fieldWidth = gameField.clientWidth || (window.innerWidth - 10);
-  const fieldHeight = gameField.clientHeight || (window.innerHeight - 180);
-
-  const cols = Math.floor(fieldWidth / 70) || 5;
+  const cols = Math.floor(fieldWidth / 95) || 4;
   const rows = Math.ceil(allWords.length / cols);
-
   const cellWidth = fieldWidth / cols;
-  const cellHeight = Math.min(78, fieldHeight / rows);
+  const cellHeight = 98;
+
+  const positions = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (positions.length < allWords.length) {
+        positions.push({ row: r, col: c });
+      }
+    }
+  }
+
+  allWords.sort(() => Math.random() - 0.5);
+  positions.sort(() => Math.random() - 0.5);
 
   allWords.forEach((item, index) => {
-    createMushroom(item.word, item.target, index, cols, cellWidth, cellHeight);
+    const pos = positions[index];
+    createMushroom(item.word, item.target, pos.col, pos.row, cellWidth, cellHeight);
   });
 }
 
-function createMushroom(word, targetBasket, index, cols, cellWidth, cellHeight) {
+function createMushroom(word, targetBasket, col, row, cellWidth, cellHeight) {
   const el = document.createElement("div");
   el.className = "mushroom";
   el.dataset.target = targetBasket;
 
-  const col = index % cols;
-  const row = Math.floor(index / cols);
-
-  const posX = Math.max(2, Math.min(col * cellWidth + (cellWidth - 65) / 2, window.innerWidth - 70));
-  const posY = Math.max(2, row * cellHeight + (cellHeight - 75) / 2);
+  const posX = Math.max(2, Math.min(col * cellWidth + (cellWidth - 85) / 2, window.innerWidth - 90));
+  const posY = Math.max(2, row * cellHeight);
 
   el.style.left = `${posX}px`;
   el.style.top = `${posY}px`;
@@ -187,6 +196,7 @@ function returnToHome(el) {
   el.style.top = `${el.dataset.homeY}px`;
 }
 
+// РЕАЛИСТИЧНЫЙ ПОЛЁТ С ПОГРУЖЕНИЕМ ЗА ПЕРЕДНИЙ БОРТИК
 function handleSuccess(el, basketEl, basketNum) {
   if (basketNum === 1) score1++;
   else score2++;
@@ -194,24 +204,36 @@ function handleSuccess(el, basketEl, basketNum) {
   totalSolved++;
   updateUI();
 
-  el.style.transition = "all 0.2s ease-in";
-  el.style.transform = "scale(0.1)";
+  const basketRect = basketEl.getBoundingClientRect();
+  const elRect = el.getBoundingClientRect();
+  
+  // Координаты прямо внутрь горловины корзины
+  const targetX = basketRect.left + (basketRect.width - elRect.width) / 2;
+  const targetY = basketRect.top + 35; // Уровень проёма корзины
+
+  // Переключаем слой, чтобы гриб летел МЕЖДУ задней стенкой и передним бортиком
+  el.classList.add("falling-in");
+  el.style.transition = "all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)";
+  el.style.left = `${targetX}px`;
+  el.style.top = `${targetY}px`;
+  el.style.transform = "scale(0.3) translateY(35px)"; // Погружается вниз за бортик
   el.style.opacity = "0";
 
-  setTimeout(() => el.remove(), 200);
+  setTimeout(() => {
+    el.remove();
+  }, 400);
 
   basketEl.classList.remove("basket-bounce");
   void basketEl.offsetWidth;
   basketEl.classList.add("basket-bounce");
 
   if (window.confetti) {
-    const rect = basketEl.getBoundingClientRect();
     confetti({
-      particleCount: 25,
-      spread: 50,
+      particleCount: 30,
+      spread: 60,
       origin: {
-        x: (rect.left + rect.width / 2) / window.innerWidth,
-        y: rect.top / window.innerHeight
+        x: (basketRect.left + basketRect.width / 2) / window.innerWidth,
+        y: basketRect.top / window.innerHeight
       }
     });
   }
@@ -220,7 +242,7 @@ function handleSuccess(el, basketEl, basketNum) {
     setTimeout(() => {
       victoryModal.classList.remove("hidden");
       confetti({ particleCount: 120, spread: 90, origin: { y: 0.5 } });
-    }, 300);
+    }, 450);
   }
 }
 
