@@ -121,7 +121,7 @@ body {
   top: 60px;
   left: 0;
   right: 0;
-  bottom: 130px; /* Ограничиваем поле, чтобы грибы не залезали на корзины */
+  bottom: 130px;
   overflow: hidden;
   z-index: 100;
   pointer-events: none;
@@ -166,7 +166,6 @@ body {
   cursor: grabbing;
 }
 
-/* ПЕРЕТАСКИВАЕМЫЙ ГРИБОЧЕК */
 .mushroom.dragging {
   z-index: 9999 !important;
   animation: none !important;
@@ -175,7 +174,6 @@ body {
   transition: none !important;
 }
 
-/* АНИМАЦИЯ ПОГРУЖЕНИЯ В КОРЗИНУ */
 .mushroom.falling-in {
   z-index: 250 !important;
   animation: none !important;
@@ -231,7 +229,7 @@ body {
   letter-spacing: 0.2px;
 }
 
-/* ИСПРАВЛЕННЫЙ КОНТЕЙНЕР КОРЗИН: Строго по центру и на фиксированном месте снизу */
+/* Корзины — строго по центру */
 .baskets-container {
   position: absolute;
   bottom: 0;
@@ -241,7 +239,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  gap: 40px; /* Равномерный отступ между корзинами первого и второго склонения */
+  gap: 40px;
   padding: 0 10px 12px 10px;
   z-index: 200;
   pointer-events: none;
@@ -277,7 +275,6 @@ body {
   z-index: 350;
 }
 
-/* РУЧКА */
 .basket-handle {
   position: absolute;
   top: 6px;
@@ -293,7 +290,6 @@ body {
 .fem-basket .basket-handle { border-color: #9e472a; }
 .masc-basket .basket-handle { border-color: #2b5c7e; }
 
-/* ЗАДНЯЯ ЧАСТЬ ПЛЕТЕНОЙ КОРЗИНЫ */
 .basket-body {
   width: 100%;
   height: 72px;
@@ -309,12 +305,12 @@ body {
 .fem-basket .basket-body { border-color: #d62828; }
 .masc-basket .basket-body { border-color: #0077b6; }
 
-/* ПЕРЕДНЯЯ СТЕНКА С ПЛЕТЕНКОЙ */
 .basket-front-wall {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
+  width: 100%;
   height: 60px;
   background: linear-gradient(135deg, #6e4228 0%, #422413 100%);
   border-radius: 0 0 24px 24px;
@@ -341,24 +337,25 @@ body {
   border-radius: 6px 6px 0 0;
 }
 
+/* ИСПРАВЛЕННЫЙ ЦЕНТР ДЛЯ ТЕКСТА СКЛОНЕНИЙ */
 .basket-label {
   color: #ffb703;
   font-weight: 900;
   font-size: 0.95rem;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 1);
   text-align: center;
-  width: 92%;
+  width: 90%;
+  margin: 5px auto 0 auto;
+  display: block;
   background: rgba(10, 15, 20, 0.88);
-  padding: 5px 8px;
+  padding: 5px 0;
   border-radius: 10px;
   border: 1.5px solid rgba(255, 183, 3, 0.4);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
   letter-spacing: 0.3px;
-  margin-top: 5px;
   z-index: 310;
 }
 
-/* УЗОР ПЛЕТЕНКИ */
 .basket-weave {
   position: absolute;
   inset: 0;
@@ -370,7 +367,6 @@ body {
   background-position: 0 0, 7px 7px;
 }
 
-/* АНИМАЦИЯ ПОДПРЫГИВАНИЯ */
 .basket-bounce {
   animation: basketElasticBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
