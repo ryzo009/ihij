@@ -121,8 +121,8 @@ body {
   top: 60px;
   left: 0;
   right: 0;
-  bottom: 0px;
-  overflow: visible;
+  bottom: 130px; /* Ограничиваем поле, чтобы грибы не залезали на корзины */
+  overflow: hidden;
   z-index: 100;
   pointer-events: none;
 }
@@ -175,7 +175,7 @@ body {
   transition: none !important;
 }
 
-/* АНИМАЦИЯ ПОГРУЖЕНИЯ В КОРЗИНУ (между задней и передней стенкой) */
+/* АНИМАЦИЯ ПОГРУЖЕНИЯ В КОРЗИНУ */
 .mushroom.falling-in {
   z-index: 250 !important;
   animation: none !important;
@@ -231,7 +231,7 @@ body {
   letter-spacing: 0.2px;
 }
 
-/* Корзины */
+/* ИСПРАВЛЕННЫЙ КОНТЕЙНЕР КОРЗИН: Строго по центру и на фиксированном месте снизу */
 .baskets-container {
   position: absolute;
   bottom: 0;
@@ -239,8 +239,9 @@ body {
   right: 0;
   height: 130px;
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
   align-items: flex-end;
+  gap: 40px; /* Равномерный отступ между корзинами первого и второго склонения */
   padding: 0 10px 12px 10px;
   z-index: 200;
   pointer-events: none;
@@ -308,7 +309,7 @@ body {
 .fem-basket .basket-body { border-color: #d62828; }
 .masc-basket .basket-body { border-color: #0077b6; }
 
-/* ПЕРЕДНЯЯ СТЕНКА С ПЛЕТЕНКОЙ (ПЕРЕКРЫВАЕТ ГРИБ) */
+/* ПЕРЕДНЯЯ СТЕНКА С ПЛЕТЕНКОЙ */
 .basket-front-wall {
   position: absolute;
   bottom: 0;
@@ -357,7 +358,7 @@ body {
   z-index: 310;
 }
 
-/* УЗОР РУССКОЙ ПЛЕТЕНКИ ШАШЕЧКОЙ */
+/* УЗОР ПЛЕТЕНКИ */
 .basket-weave {
   position: absolute;
   inset: 0;
