@@ -148,38 +148,66 @@ function renderMushrooms() {
     field.replaceChildren(fragment);
 }
 
-// Новый гриб занимает ближайшее свободное место
-function fillEmptySpot(removedMushroom) {
+// Последний гриб перемещается на место убранного
+function fillEmptySpot(removedMushroom, removedIndex) {
+    // Если убран последний гриб, перемещать больше нечего
+    if (removedIndex >= mushrooms.length) return;
+
+    // Берём именно последний гриб из массива
+    const lastMushroom = mushrooms[mushrooms.length - 1];
+
+    if (!lastMushroom) return;
+
+    const lastElement = Array.from(
+        field.querySelectorAll(".mushroom")
+    ).find(element => element.dataset.word === lastMushroom.word);
+
+    if (!lastElement || lastElement === removedMushroom) return;
+
     const emptyX = parseFloat(removedMushroom.dataset.originalLeft);
     const emptyY = parseFloat(removedMushroom.dataset.originalTop);
 
-    const remainingMushrooms = Array.from(
-        field.querySelectorAll(".mushroom")
-    ).filter(mushroom => mushroom !== removedMushroom);
+    const currentX = parseFloat(lastElement.style.left);
+    const currentY = parseFloat(lastElement.style.top);
 
-    if (remainingMushrooms.length === 0) return;
+    if (
+        !Number.isFinite(emptyX) ||
+        !Number.isFinite(emptyY) ||
+        !Number.isFinite(currentX) ||
+        !Number.isFinite(currentY)
+    ) return;
 
-    let nearestMushroom = null;
-    let nearestDistance = Infinity;
+    // Переставляем последний элемент массива на освободившееся место
+    const movedMushroom = mushrooms.pop();
+    mushrooms.splice(removedIndex, 0, movedMushroom);
 
-    remainingMushrooms.forEach(mushroom => {
-        const x = parseFloat(mushroom.style.left);
-        const y = parseFloat(mushroom.style.top);
+    const dx = currentX - emptyX;
+    const dy = currentY - emptyY;
 
-        const distance = Math.hypot(
-            x - emptyX,
-            y - emptyY
+    // Сразу задаём новую позицию, а визуально плавно перемещаем гриб
+    lastElement.style.left = `${emptyX}px`;
+    lastElement.style.top = `${emptyY}px`;
+
+    lastElement.style.pointerEvents = "none";
+
+    if (typeof lastElement.animate === "function") {
+        const animation = lastElement.animate(
+            [
+                { transform: `translate3d(${dx}px, ${dy}px, 0)` },
+                { transform: "translate3d(0, 0, 0)" }
+            ],
+            {
+                duration: 260,
+                easing: "cubic-bezier(0.22, 1, 0.36, 1)"
+            }
         );
 
-        if (distance < nearestDistance) {
-            nearestDistance = distance;
-            nearestMushroom = mushroom;
-        }
-    });
-
-    if (nearestMushroom) {
-        nearestMushroom.style.left = `${emptyX}px`;
-        nearestMushroom.style.top = `${emptyY}px`;
+        animation.onfinish = () => {
+            animation.cancel();
+            lastElement.style.pointerEvents = "";
+        };
+    } else {
+        lastElement.style.pointerEvents = "";
     }
 }
 
@@ -370,10 +398,10 @@ function checkAnswer(element, basketNumber) {
 
         if (index !== -1) {
             mushrooms.splice(index, 1);
-        }
 
-        // Заполняем освободившееся место ближайшим грибом
-        fillEmptySpot(element);
+            // Последний гриб занимает освободившееся место
+            fillEmptySpot(element, index);
+        }
 
         element.remove();
 
