@@ -49,29 +49,30 @@ function initGame() {
   spawnNextBatch();
 }
 
-// Создаем жесткую неизменяемую сетку слотов по размеру экрана
+// Строим СЕТКУ СЛОТОВ на основе реальных физических размеров видимого контейнера
 function setupGridSlots() {
   gridSlots = [];
   
-  const fieldWidth = gameField.clientWidth;
-  const fieldHeight = gameField.clientHeight;
+  const rect = gameField.getBoundingClientRect();
+  const fieldWidth = rect.width;
+  const fieldHeight = rect.height;
 
-  const mushroomW = 75;
-  const mushroomH = 85;
+  const mushroomW = 74;
+  const mushroomH = 82;
 
-  // Рассчитываем сколько колонок и рядов гарантированно влезает без вылетов
-  const cols = Math.floor(fieldWidth / mushroomW) || 4;
-  const rows = Math.floor(fieldHeight / mushroomH) || 3;
+  // Безопасное вычисление строк и колонок под размер экрана
+  const cols = Math.max(3, Math.floor(fieldWidth / mushroomW));
+  const rows = Math.max(2, Math.floor(fieldHeight / mushroomH));
 
   const cellW = fieldWidth / cols;
   const cellH = fieldHeight / rows;
 
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
+      // Ограничиваем координаты от вылета за границы
       const posX = c * cellW + (cellW - mushroomW) / 2;
       const posY = r * cellH + (cellH - mushroomH) / 2;
-      
-      // Защита от выхода за границы контейнера
+
       const safeX = Math.max(2, Math.min(posX, fieldWidth - mushroomW - 2));
       const safeY = Math.max(2, Math.min(posY, fieldHeight - mushroomH - 2));
 
@@ -79,11 +80,10 @@ function setupGridSlots() {
     }
   }
 
-  // Перемешиваем слоты, чтобы грибы появлялись в разных частях поля
+  // Перемешиваем слоты
   gridSlots.sort(() => Math.random() - 0.5);
 }
 
-// Заполняем только свободные пустые слоты
 function spawnNextBatch() {
   for (let i = 0; i < gridSlots.length && remainingPool.length > 0; i++) {
     const slot = gridSlots[i];
@@ -234,7 +234,6 @@ function handleSuccess(el, basketEl, basketNum) {
   totalSolved++;
   updateUI();
 
-  // Освобождаем слот ушедшего гриба, чтобы туда встал новый
   const slot = activeMushroomsMap.get(el);
   if (slot) {
     slot.occupied = false;
@@ -303,4 +302,3 @@ function updateUI() {
 }
 
 window.addEventListener("load", initGame);
-// Убрали автоматический перезапуск по resize, чтобы игра не ломала текущую расстановку при скролле на телефоне
