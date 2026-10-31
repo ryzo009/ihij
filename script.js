@@ -92,6 +92,9 @@ function addDragListeners(el) {
   let startX, startY, initialLeft, initialTop;
 
   const onStart = (e) => {
+    // Отменяем стандартный выделяющийся текст браузера
+    if (e.cancelable) e.preventDefault();
+    
     isDragging = true;
     el.style.transition = "none";
     el.classList.add("dragging");
@@ -112,7 +115,7 @@ function addDragListeners(el) {
 
   const onMove = (e) => {
     if (!isDragging) return;
-    if (e.touches) e.preventDefault();
+    if (e.cancelable) e.preventDefault();
 
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -196,7 +199,6 @@ function returnToHome(el) {
   el.style.top = `${el.dataset.homeY}px`;
 }
 
-// РЕАЛИСТИЧНЫЙ ПОЛЁТ С ПОГРУЖЕНИЕМ ЗА ПЕРЕДНИЙ БОРТИК
 function handleSuccess(el, basketEl, basketNum) {
   if (basketNum === 1) score1++;
   else score2++;
@@ -207,16 +209,14 @@ function handleSuccess(el, basketEl, basketNum) {
   const basketRect = basketEl.getBoundingClientRect();
   const elRect = el.getBoundingClientRect();
   
-  // Координаты прямо внутрь горловины корзины
   const targetX = basketRect.left + (basketRect.width - elRect.width) / 2;
-  const targetY = basketRect.top + 35; // Уровень проёма корзины
+  const targetY = basketRect.top + 35;
 
-  // Переключаем слой, чтобы гриб летел МЕЖДУ задней стенкой и передним бортиком
   el.classList.add("falling-in");
   el.style.transition = "all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)";
   el.style.left = `${targetX}px`;
   el.style.top = `${targetY}px`;
-  el.style.transform = "scale(0.3) translateY(35px)"; // Погружается вниз за бортик
+  el.style.transform = "scale(0.3) translateY(35px)";
   el.style.opacity = "0";
 
   setTimeout(() => {
