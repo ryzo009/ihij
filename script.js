@@ -49,34 +49,31 @@ function initGame() {
   spawnNextBatch();
 }
 
-// РАВНОМЕРНАЯ СЕТКА: СТРОГО 3 КОЛОНКИ НА 2 РЯДА (МАКСИМУМ 6 ЭЛЕМЕНТОВ НА ЭКРАНЕ)
+// СТРОГО 3 КОЛОНКИ НА 2 РЯДА (ВСЕГО 6 ГРИБОВ ОДНОВРЕМЕННО НА ЭКРАНЕ)
 function setupGridSlots() {
   gridSlots = [];
   
-  const rect = gameField.getBoundingClientRect();
-  const fieldWidth = rect.width;
-  const fieldHeight = rect.height;
+  const fieldWidth = gameField.clientWidth;
+  const fieldHeight = gameField.clientHeight;
 
-  // Фиксированная сетка 3 колонки x 2 ряда
   const cols = 3;
   const rows = 2;
 
-  const cellW = fieldWidth / cols;
-  const cellH = fieldHeight / rows;
+  const mushroomW = 70;
+  const mushroomH = 78;
 
-  const mushroomW = 66;
-  const mushroomH = 74;
+  const totalGridW = cols * mushroomW + (cols - 1) * 15;
+  const totalGridH = rows * mushroomH + (rows - 1) * 15;
+
+  const startX = Math.max(10, (fieldWidth - totalGridW) / 2);
+  const startY = Math.max(10, (fieldHeight - totalGridH) / 2);
 
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      const posX = c * cellW + (cellW - mushroomW) / 2;
-      const posY = r * cellH + (cellH - mushroomH) / 2;
+      const posX = startX + c * (mushroomW + 15);
+      const posY = startY + r * (mushroomH + 15);
 
-      gridSlots.push({ 
-        x: Math.max(5, Math.min(posX, fieldWidth - mushroomW - 5)), 
-        y: Math.max(5, Math.min(posY, fieldHeight - mushroomH - 5)), 
-        occupied: false 
-      });
+      gridSlots.push({ x: posX, y: posY, occupied: false });
     }
   }
 }
