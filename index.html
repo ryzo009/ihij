@@ -1,73 +1,65 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Грибной тренажер: Род и склонение существительных</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лесная Поляна — Склонение существительных</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
 </head>
 <body>
 
-  <!-- Лесной фон -->
-  <div class="forest-bg">
-    <div class="sunbeams"></div>
-    <div class="firefly"></div>
-    <div class="firefly"></div>
-  </div>
+    <div class="forest-bg"></div>
 
-  <!-- Шапка -->
-  <header class="app-header">
-    <h1>🌲 Лесная Поляна: Склонение Существительных 🌲</h1>
-    <div class="progress-container">
-      <div id="progress-bar" class="progress-bar"></div>
-    </div>
-  </header>
+    <header class="app-header">
+        <h1>🌲 Лесная Поляна 🌲</h1>
+        <p>Склонение существительных</p>
 
-  <!-- Игровое поле (строго ограничено) -->
-  <main id="game-field" class="game-field"></main>
+        <div class="progress-container">
+            <div id="progress-bar"></div>
+        </div>
 
-  <!-- Ошибка -->
-  <div id="error-cross" class="error-cross hidden">✖</div>
+        <small>
+            <span id="progress-count">0</span> из 72 грибов
+        </small>
+    </header>
 
-  <!-- Победа -->
-  <div id="victory-modal" class="modal hidden">
-    <div class="modal-content">
-      <h2>🎉 Великолепно! 🎉</h2>
-      <p>Вы успешно отсортировали все грибы по корзинкам!</p>
-      <button id="restart-btn" onclick="initGame()">Сыграть еще раз</button>
-    </div>
-  </div>
+    <main id="game-field" class="game-field"></main>
 
-  <!-- Корзины -->
-  <footer class="baskets-container">
-    <div id="basket-1" class="basket-item fem-basket" data-basket="1">
-      <div class="basket-counter" id="score-1">0</div>
-      <div class="basket-handle"></div>
-      <div class="basket-body">
-        <div class="basket-weave"></div>
-      </div>
-      <div class="basket-front-wall">
-        <div class="basket-weave"></div>
-        <div class="basket-rim"></div>
-        <div class="basket-label">1-е склонение</div>
-      </div>
+    <div id="error-cross" class="error-cross hidden">
+        ✖ Неправильно! Попробуй ещё раз
     </div>
 
-    <div id="basket-2" class="basket-item masc-basket" data-basket="2">
-      <div class="basket-counter" id="score-2">0</div>
-      <div class="basket-handle"></div>
-      <div class="basket-body">
-        <div class="basket-weave"></div>
-      </div>
-      <div class="basket-front-wall">
-        <div class="basket-weave"></div>
-        <div class="basket-rim"></div>
-        <div class="basket-label">2-е склонение</div>
-      </div>
+    <div id="victory-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="trophy">🏆</div>
+            <h2>Великолепно!</h2>
+            <p>Все грибы рассортированы правильно!</p>
+            <button id="restart-btn">Сыграть ещё раз</button>
+        </div>
     </div>
-  </footer>
 
-  <script src="script.js"></script>
+    <footer class="baskets-container">
+
+        <div id="basket-1" class="basket-item">
+            <div class="basket-counter" id="score-1">0</div>
+            <div class="basket-handle"></div>
+            <div class="basket-body"></div>
+            <div class="basket-front-wall">
+                <span>1-е склонение</span>
+            </div>
+        </div>
+
+        <div id="basket-2" class="basket-item">
+            <div class="basket-counter" id="score-2">0</div>
+            <div class="basket-handle"></div>
+            <div class="basket-body"></div>
+            <div class="basket-front-wall">
+                <span>2-е склонение</span>
+            </div>
+        </div>
+
+    </footer>
+
 </body>
 </html>
