@@ -1,3 +1,4 @@
+
 const list1 = [
     "Мама", "Парусина", "Вода", "Земля", "Книга", "Школа",
     "Страна", "Весна", "Зима", "Гора", "Стена", "Трава",
@@ -40,6 +41,12 @@ let dragOffsetX = 0;
 let dragOffsetY = 0;
 let errorTimer = null;
 let resizeTimeout = null;
+
+let dragFrame = null;
+let pendingPointerEvent = null;
+let basket1Rect = null;
+let basket2Rect = null;
+let fieldRect = null;
 
 function shuffle(array) {
     const result = [...array];
@@ -154,6 +161,11 @@ function startDrag(event) {
     dragOffsetX = event.clientX - rect.left;
     dragOffsetY = event.clientY - rect.top;
 
+    // Размеры считываются один раз перед перетаскиванием
+    fieldRect = field.getBoundingClientRect();
+    basket1Rect = basket1.getBoundingClientRect();
+    basket2Rect = basket2.getBoundingClientRect();
+
     mushroom.classList.add("dragging");
     mushroom.setPointerCapture(event.pointerId);
 
@@ -170,17 +182,49 @@ function moveDrag(event) {
 
     event.preventDefault();
 
-    const fieldRect = field.getBoundingClientRect();
+    // Сохраняем последнее положение указателя
+    pendingPointerEvent = {
+        clientX: event.clientX,
+        clientY: event.clientY
+    };
+
+    // Обновляем положение не чаще одного раза за кадр
+    if (!dragFrame) {
+        dragFrame = requestAnimationFrame(updateDragPosition);
+    }
+}
+
+function updateDragPosition() {
+    dragFrame = null;
+
+    if (!activeMushroom || !pendingPointerEvent) return;
+
+    const event = pendingPointerEvent;
 
     const x = event.clientX - fieldRect.left - dragOffsetX;
     const y = event.clientY - fieldRect.top - dragOffsetY;
 
     activeMushroom.style.left = `${x}px`;
     activeMushroom.style.top = `${y}px`;
+
+    const over1 =
+        event.clientX >= basket1Rect.left &&
+        event.clientX <= basket1Rect.right &&
+        event.clientY >= basket1Rect.top &&
+        event.clientY <= basket1Rect.bottom;
+
+    const over2 =
+        event.clientX >= basket2Rect.left &&
+        event.clientX <= basket2Rect.right &&
+        event.clientY >= basket2Rect.top &&
+        event.clientY <= basket2Rect.bottom;
+
+    basket1.classList.toggle("drag-over", over1);
+    basket2.classList.toggle("drag-over", over2);
 }
 
 function isOverBasket(event, basket) {
-    const rect = basket.getBoundingClientRect();
+    const rect = basket === basket1 ? basket1Rect : basket2Rect;
 
     return (
         event.clientX >= rect.left &&
@@ -196,6 +240,18 @@ function removeDragListeners(mushroom) {
     mushroom.removeEventListener("pointercancel", cancelDrag);
 }
 
+function finishDrag() {
+    if (dragFrame) {
+        cancelAnimationFrame(dragFrame);
+        dragFrame = null;
+    }
+
+    pendingPointerEvent = null;
+
+    basket1.classList.remove("drag-over");
+    basket2.classList.remove("drag-over");
+}
+
 function endDrag(event) {
     if (!activeMushroom) return;
 
@@ -203,6 +259,8 @@ function endDrag(event) {
 
     const over1 = isOverBasket(event, basket1);
     const over2 = isOverBasket(event, basket2);
+
+    finishDrag();
 
     mushroom.classList.remove("dragging");
     removeDragListeners(mushroom);
@@ -222,6 +280,8 @@ function cancelDrag() {
     if (!activeMushroom) return;
 
     const mushroom = activeMushroom;
+
+    finishDrag();
 
     mushroom.classList.remove("dragging");
     removeDragListeners(mushroom);
@@ -253,9 +313,13 @@ function checkAnswer(element, basketNumber) {
 
         const word = element.dataset.word;
 
-        mushrooms = mushrooms.filter(
-            item => item.word !== word
+        const index = mushrooms.findIndex(
+            item => item.word === word
         );
+
+        if (index !== -1) {
+            mushrooms.splice(index, 1);
+        }
 
         element.remove();
 
@@ -304,6 +368,7 @@ function initGame() {
     count2 = 0;
     activeMushroom = null;
 
+    finishDrag();
     clearTimeout(errorTimer);
 
     score1.textContent = "0";
@@ -332,3 +397,4 @@ window.addEventListener("resize", () => {
 });
 
 initGame();
+
