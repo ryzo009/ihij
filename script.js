@@ -92,8 +92,8 @@ function addDragListeners(el) {
   let startX, startY, initialLeft, initialTop;
 
   const onStart = (e) => {
-    // Отменяем стандартный выделяющийся текст браузера
-    if (e.cancelable) e.preventDefault();
+    // ПОЛНЫЙ ЗАПРЕТ ВЫДЕЛЕНИЯ ТЕКСТА
+    e.preventDefault();
     
     isDragging = true;
     el.style.transition = "none";
@@ -115,7 +115,9 @@ function addDragListeners(el) {
 
   const onMove = (e) => {
     if (!isDragging) return;
-    if (e.cancelable) e.preventDefault();
+    
+    // БЛОКИРУЕМ ВЫДЕЛЕНИЕ ПРИ ДВИЖЕНИИ МЫШИ
+    e.preventDefault();
 
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
