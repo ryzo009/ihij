@@ -1,494 +1,335 @@
-"use strict";
-
-// ========================================
-// СЛОВА ДЛЯ ИГРЫ
-// ========================================
-
 const list1 = [
-  "Мама", "Парусина", "Вода", "Земля", "Книга",
-  "Школа", "Страна", "Весна", "Зима", "Гора",
-  "Стена", "Трава", "Семья", "Баня", "Дорога",
-  "Липа", "Улыбка", "Муха", "Ракета", "Папа",
-  "Дедушка", "Дядя", "Мужчина", "Юноша", "Судья",
-  "Звезда", "Река", "Тропа", "Луна", "Туча",
-  "Тетрадь", "Птица", "Рыба", "Шляпа",
-  "Тропинка", "Ладонь", "Капля"
+    "Мама", "Парусина", "Вода", "Земля", "Книга", "Школа",
+    "Страна", "Весна", "Зима", "Гора", "Стена", "Трава",
+    "Семья", "Баня", "Дорога", "Липа", "Улыбка", "Муха",
+    "Ракета", "Папа", "Дедушка", "Дядя", "Мужчина", "Юноша",
+    "Судья", "Звезда", "Река", "Тропа", "Луна", "Туча",
+    "Тетрадь", "Птица", "Рыба", "Шляпа", "Тропинка",
+    "Ладонь", "Капля"
 ];
 
 const list2 = [
-  "Стол", "Дом", "Конь", "Стул", "Трамвай",
-  "Дуб", "Ветер", "Завод", "Врач", "Дождь",
-  "Окно", "Солнце", "Небо", "Молоко", "Поле",
-  "Море", "Здание", "Блюдце", "Письмо", "Яблоко",
-  "Дерево", "Озеро", "Лето", "Утро", "Животное",
-  "Гриб", "Лес", "Пень", "Город", "Забор",
-  "Мост", "Огонь", "Цветок", "Брат", "Камень"
+    "Стол", "Дом", "Конь", "Стул", "Трамвай", "Дуб",
+    "Ветер", "Завод", "Врач", "Дождь", "Окно", "Солнце",
+    "Небо", "Молоко", "Поле", "Море", "Здание", "Блюдце",
+    "Письмо", "Яблоко", "Дерево", "Озеро", "Лето", "Утро",
+    "Животное", "Гриб", "Лес", "Пень", "Город", "Забор",
+    "Мост", "Огонь", "Цветок", "Брат", "Камень"
 ];
 
-// ========================================
-// ПЕРЕМЕННЫЕ ИГРЫ
-// ========================================
+const TOTAL = list1.length + list2.length;
 
-let score1 = 0;
-let score2 = 0;
-let totalSolved = 0;
-
-const totalMushrooms = list1.length + list2.length;
-
-const gameField = document.getElementById("game-field");
-const score1El = document.getElementById("score-1");
-const score2El = document.getElementById("score-2");
-const progressBar = document.getElementById("progress-bar");
-const errorCross = document.getElementById("error-cross");
-const victoryModal = document.getElementById("victory-modal");
+const field = document.getElementById("game-field");
 const basket1 = document.getElementById("basket-1");
 const basket2 = document.getElementById("basket-2");
+const progressBar = document.getElementById("progress-bar");
+const progressCount = document.getElementById("progress-count");
+const score1 = document.getElementById("score-1");
+const score2 = document.getElementById("score-2");
+const errorMessage = document.getElementById("error-cross");
+const victoryModal = document.getElementById("victory-modal");
+const restartButton = document.getElementById("restart-btn");
 
-let resizeTimer;
+let mushrooms = [];
+let completed = 0;
+let count1 = 0;
+let count2 = 0;
+let activeMushroom = null;
+let dragOffsetX = 0;
+let dragOffsetY = 0;
+let errorTimer = null;
 
-// ========================================
-// ЗАПУСК И ПЕРЕЗАПУСК
-// ========================================
+function shuffle(array) {
+    const result = [...array];
 
-function initGame() {
-  score1 = 0;
-  score2 = 0;
-  totalSolved = 0;
+    for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+    }
 
-  gameField.innerHTML = "";
-
-  victoryModal.classList.add("hidden");
-  errorCross.classList.add("hidden");
-
-  const allMushrooms = [
-    ...list1.map(word => ({ word, target: 1 })),
-    ...list2.map(word => ({ word, target: 2 }))
-  ];
-
-  // Перемешиваем слова
-  for (let i = allMushrooms.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-
-    [allMushrooms[i], allMushrooms[j]] =
-      [allMushrooms[j], allMushrooms[i]];
-  }
-
-  updateUI();
-  spawnAllMushrooms(allMushrooms);
+    return result;
 }
 
-// ========================================
-// АДАПТИВНОЕ РАСПОЛОЖЕНИЕ ГРИБОВ
-// ========================================
+function createMushrooms() {
+    mushrooms = [
+        ...list1.map(word => ({ word, type: 1 })),
+        ...list2.map(word => ({ word, type: 2 }))
+    ];
+
+    mushrooms = shuffle(mushrooms);
+}
 
 function getMushroomSize() {
-  const mushroom = document.createElement("div");
-  mushroom.className = "mushroom";
-
-  mushroom.style.visibility = "hidden";
-  mushroom.style.left = "0";
-  mushroom.style.top = "0";
-
-  gameField.appendChild(mushroom);
-
-  const rect = mushroom.getBoundingClientRect();
-
-  mushroom.remove();
-
-  return {
-    width: rect.width || 43,
-    height: rect.height || 53
-  };
+    return window.innerWidth <= 600
+        ? { width: 54, height: 66 }
+        : { width: 66, height: 76 };
 }
 
-function spawnAllMushrooms(items) {
-  const fieldWidth = gameField.clientWidth;
-  const fieldHeight = gameField.clientHeight;
+function calculatePositions() {
+    const fieldWidth = field.clientWidth;
+    const fieldHeight = field.clientHeight;
+    const size = getMushroomSize();
 
-  if (!fieldWidth || !fieldHeight) {
-    requestAnimationFrame(() => spawnAllMushrooms(items));
-    return;
-  }
+    const gapX = window.innerWidth <= 600 ? 3 : 8;
+    const gapY = window.innerWidth <= 600 ? 5 : 8;
 
-  const size = getMushroomSize();
-
-  const mushroomW = size.width;
-  const mushroomH = size.height;
-
-  // Определяем число колонок по ширине экрана
-  const gapX = 2;
-  const gapY = 3;
-
-  const cols = Math.max(
-    1,
-    Math.floor((fieldWidth + gapX) / (mushroomW + gapX))
-  );
-
-  const rows = Math.ceil(items.length / cols);
-
-  // Равномерно распределяем грибы по полю
-  const cellW = fieldWidth / cols;
-  const cellH = fieldHeight / rows;
-
-  items.forEach((item, index) => {
-    const row = Math.floor(index / cols);
-    const col = index % cols;
-
-    const rowItems = Math.min(
-      cols,
-      items.length - row * cols
+    const columns = Math.max(
+        1,
+        Math.floor((fieldWidth - 12) / (size.width + gapX))
     );
 
-    // Центрируем последнюю неполную строку
-    const rowWidth = rowItems * cellW;
-    const rowOffset = (fieldWidth - rowWidth) / 2;
+    const rows = Math.ceil(mushrooms.length / columns);
 
-    const posX =
-      rowOffset + col * cellW + (cellW - mushroomW) / 2;
+    const totalHeight = rows * (size.height + gapY) - gapY;
+    const startY = Math.max(4, (fieldHeight - totalHeight) / 2);
 
-    const posY =
-      row * cellH + (cellH - mushroomH) / 2;
+    const positions = [];
 
-    const safeX = Math.max(
-      0,
-      Math.min(posX, fieldWidth - mushroomW)
-    );
+    for (let row = 0; row < rows; row++) {
+        const startIndex = row * columns;
+        const itemsInRow = Math.min(
+            columns,
+            mushrooms.length - startIndex
+        );
 
-    const safeY = Math.max(
-      0,
-      Math.min(posY, fieldHeight - mushroomH)
-    );
+        const rowWidth = itemsInRow * (size.width + gapX) - gapX;
+        const startX = Math.max(4, (fieldWidth - rowWidth) / 2);
 
-    createMushroomAt(
-      item.word,
-      item.target,
-      safeX,
-      safeY,
-      index
-    );
-  });
-}
-
-// ========================================
-// СОЗДАНИЕ ГРИБА
-// ========================================
-
-function createMushroomAt(word, targetBasket, x, y, index) {
-  const el = document.createElement("div");
-
-  el.className = "mushroom";
-  el.dataset.target = targetBasket;
-
-  const cap = document.createElement("div");
-  cap.className = "mushroom-cap";
-
-  const stem = document.createElement("div");
-  stem.className = "mushroom-stem";
-
-  const text = document.createElement("div");
-  text.className = "mushroom-text";
-  text.textContent = word;
-  text.title = word;
-
-  el.append(cap, stem, text);
-
-  el.style.left = `${x}px`;
-  el.style.top = `${y}px`;
-  el.style.animationDelay = `${Math.min(index * 5, 150)}ms`;
-
-  el.dataset.homeX = x;
-  el.dataset.homeY = y;
-
-  addDragListeners(el);
-
-  gameField.appendChild(el);
-}
-
-// ========================================
-// ПЕРЕТАСКИВАНИЕ МЫШЬЮ И ПАЛЬЦЕМ
-// ========================================
-
-function addDragListeners(el) {
-  let isDragging = false;
-
-  let startX = 0;
-  let startY = 0;
-
-  let initialLeft = 0;
-  let initialTop = 0;
-
-  el.addEventListener("pointerdown", onStart);
-
-  function onStart(e) {
-    if (e.button !== undefined && e.button !== 0) return;
-
-    if (el.classList.contains("falling-in")) return;
-
-    e.preventDefault();
-
-    isDragging = true;
-
-    startX = e.clientX;
-    startY = e.clientY;
-
-    initialLeft = parseFloat(el.style.left) || 0;
-    initialTop = parseFloat(el.style.top) || 0;
-
-    el.style.transition = "none";
-    el.classList.add("dragging");
-
-    el.style.zIndex = "1000";
-
-    try {
-      el.setPointerCapture(e.pointerId);
-    } catch (_) {
-      // Браузер может не поддерживать захват указателя
-    }
-  }
-
-  el.addEventListener("pointermove", onMove);
-  el.addEventListener("pointerup", onEnd);
-  el.addEventListener("pointercancel", onCancel);
-
-  function onMove(e) {
-    if (!isDragging) return;
-
-    e.preventDefault();
-
-    const dx = e.clientX - startX;
-    const dy = e.clientY - startY;
-
-    el.style.left = `${initialLeft + dx}px`;
-    el.style.top = `${initialTop + dy}px`;
-  }
-
-  function onEnd(e) {
-    if (!isDragging) return;
-
-    isDragging = false;
-
-    el.classList.remove("dragging");
-    el.style.zIndex = "";
-
-    checkDrop(el);
-  }
-
-  function onCancel() {
-    if (!isDragging) return;
-
-    isDragging = false;
-
-    el.classList.remove("dragging");
-    el.style.zIndex = "";
-
-    returnToHome(el);
-  }
-}
-
-// ========================================
-// ПРОВЕРКА КОРЗИНЫ
-// ========================================
-
-function checkDrop(el) {
-  if (!el.isConnected) return;
-
-  const rect = el.getBoundingClientRect();
-
-  const center = {
-    x: rect.left + rect.width / 2,
-    y: rect.top + rect.height / 2
-  };
-
-  const b1 = basket1.getBoundingClientRect();
-  const b2 = basket2.getBoundingClientRect();
-
-  // Немного увеличиваем область попадания в корзины
-  const expandedB1 = {
-    left: b1.left - 12,
-    right: b1.right + 12,
-    top: b1.top - 45,
-    bottom: b1.bottom + 10
-  };
-
-  const expandedB2 = {
-    left: b2.left - 12,
-    right: b2.right + 12,
-    top: b2.top - 45,
-    bottom: b2.bottom + 10
-  };
-
-  const inBasket1 = isInside(center, expandedB1);
-  const inBasket2 = isInside(center, expandedB2);
-
-  const target = Number(el.dataset.target);
-
-  if (inBasket1) {
-    if (target === 1) {
-      handleSuccess(el, basket1, 1);
-    } else {
-      handleError(el);
+        for (let col = 0; col < itemsInRow; col++) {
+            positions.push({
+                x: startX + col * (size.width + gapX),
+                y: startY + row * (size.height + gapY)
+            });
+        }
     }
 
-    return;
-  }
-
-  if (inBasket2) {
-    if (target === 2) {
-      handleSuccess(el, basket2, 2);
-    } else {
-      handleError(el);
-    }
-
-    return;
-  }
-
-  returnToHome(el);
+    return positions;
 }
 
-function isInside(point, rect) {
-  return (
-    point.x >= rect.left &&
-    point.x <= rect.right &&
-    point.y >= rect.top &&
-    point.y <= rect.bottom
-  );
-}
+function renderMushrooms() {
+    if (activeMushroom) return;
 
-// ========================================
-// ВОЗВРАТ ГРИБА НА МЕСТО
-// ========================================
+    field.innerHTML = "";
 
-function returnToHome(el) {
-  if (!el.isConnected) return;
+    const positions = calculatePositions();
 
-  el.style.zIndex = "";
-  el.style.transition = "left 0.22s ease, top 0.22s ease";
+    mushrooms.forEach((mushroom, index) => {
+        const position = positions[index];
 
-  el.style.left = `${el.dataset.homeX}px`;
-  el.style.top = `${el.dataset.homeY}px`;
-}
+        const element = document.createElement("div");
+        element.className = "mushroom";
+        element.dataset.type = mushroom.type;
+        element.dataset.word = mushroom.word;
 
-// ========================================
-// ПРАВИЛЬНЫЙ ОТВЕТ
-// ========================================
+        element.style.left = `${position.x}px`;
+        element.style.top = `${position.y}px`;
 
-function handleSuccess(el, basketEl, basketNum) {
-  if (!el.isConnected) return;
+        element.innerHTML = `
+            <div class="mushroom-cap"></div>
+            <div class="mushroom-stem"></div>
+            <div class="mushroom-word">${mushroom.word}</div>
+        `;
 
-  if (basketNum === 1) {
-    score1++;
-  } else {
-    score2++;
-  }
+        element.addEventListener("pointerdown", startDrag);
 
-  totalSolved++;
-
-  updateUI();
-
-  const basketRect = basketEl.getBoundingClientRect();
-
-  basketEl.classList.remove("basket-bounce");
-
-  void basketEl.offsetWidth;
-
-  basketEl.classList.add("basket-bounce");
-
-  // Убираем гриб после правильной сортировки
-  el.classList.add("falling-in");
-
-  el.style.transition =
-    "transform 0.3s ease, opacity 0.3s ease";
-
-  el.style.transform = "scale(0.25)";
-  el.style.opacity = "0";
-
-  setTimeout(() => {
-    el.remove();
-  }, 320);
-
-  // Эффект конфетти
-  if (typeof window.confetti === "function") {
-    window.confetti({
-      particleCount: 18,
-      spread: 45,
-      origin: {
-        x: (basketRect.left + basketRect.width / 2) /
-          window.innerWidth,
-
-        y: basketRect.top / window.innerHeight
-      }
+        field.appendChild(element);
     });
-  }
+}
 
-  // Победа
-  if (totalSolved >= totalMushrooms) {
-    setTimeout(() => {
-      victoryModal.classList.remove("hidden");
+function startDrag(event) {
+    if (activeMushroom) return;
 
-      if (typeof window.confetti === "function") {
-        window.confetti({
-          particleCount: 120,
-          spread: 100,
-          origin: { y: 0.5 }
+    event.preventDefault();
+
+    const mushroom = event.currentTarget;
+    const rect = mushroom.getBoundingClientRect();
+
+    activeMushroom = mushroom;
+
+    dragOffsetX = event.clientX - rect.left;
+    dragOffsetY = event.clientY - rect.top;
+
+    mushroom.classList.add("dragging");
+    mushroom.setPointerCapture(event.pointerId);
+
+    mushroom.addEventListener("pointermove", moveDrag);
+    mushroom.addEventListener("pointerup", endDrag);
+    mushroom.addEventListener("pointercancel", cancelDrag);
+}
+
+function moveDrag(event) {
+    if (!activeMushroom) return;
+
+    event.preventDefault();
+
+    const fieldRect = field.getBoundingClientRect();
+
+    const x = event.clientX - fieldRect.left - dragOffsetX;
+    const y = event.clientY - fieldRect.top - dragOffsetY;
+
+    activeMushroom.style.left = `${x}px`;
+    activeMushroom.style.top = `${y}px`;
+
+    basket1.classList.toggle(
+        "drag-over",
+        isOverBasket(event, basket1)
+    );
+
+    basket2.classList.toggle(
+        "drag-over",
+        isOverBasket(event, basket2)
+    );
+}
+
+function isOverBasket(event, basket) {
+    const rect = basket.getBoundingClientRect();
+
+    return (
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom
+    );
+}
+
+function endDrag(event) {
+    if (!activeMushroom) return;
+
+    const mushroom = activeMushroom;
+
+    const over1 = isOverBasket(event, basket1);
+    const over2 = isOverBasket(event, basket2);
+
+    mushroom.classList.remove("dragging");
+
+    mushroom.removeEventListener("pointermove", moveDrag);
+    mushroom.removeEventListener("pointerup", endDrag);
+    mushroom.removeEventListener("pointercancel", cancelDrag);
+
+    basket1.classList.remove("drag-over");
+    basket2.classList.remove("drag-over");
+
+    activeMushroom = null;
+
+    if (over1) {
+        checkAnswer(mushroom, 1);
+    } else if (over2) {
+        checkAnswer(mushroom, 2);
+    } else {
+        renderMushrooms();
+    }
+}
+
+function cancelDrag() {
+    if (!activeMushroom) return;
+
+    activeMushroom.classList.remove("dragging");
+    activeMushroom = null;
+
+    basket1.classList.remove("drag-over");
+    basket2.classList.remove("drag-over");
+
+    renderMushrooms();
+}
+
+function checkAnswer(element, basketNumber) {
+    const correctType = Number(element.dataset.type);
+
+    if (correctType === basketNumber) {
+        if (basketNumber === 1) {
+            count1++;
+            score1.textContent = count1;
+        } else {
+            count2++;
+            score2.textContent = count2;
+        }
+
+        completed++;
+
+        updateProgress();
+
+        element.style.transition = "transform 0.2s, opacity 0.2s";
+        element.style.transform = "scale(0)";
+        element.style.opacity = "0";
+
+        mushrooms = mushrooms.filter(
+            item => item.word !== element.dataset.word
+        );
+
+        setTimeout(() => {
+            renderMushrooms();
+
+            if (completed === TOTAL) {
+                showVictory();
+            }
+        }, 180);
+
+    } else {
+        showError();
+        renderMushrooms();
+    }
+}
+
+function updateProgress() {
+    progressCount.textContent = completed;
+
+    progressBar.style.width =
+        `${(completed / TOTAL) * 100}%`;
+}
+
+function showError() {
+    errorMessage.classList.remove("hidden");
+
+    clearTimeout(errorTimer);
+
+    errorTimer = setTimeout(() => {
+        errorMessage.classList.add("hidden");
+    }, 1200);
+}
+
+function showVictory() {
+    victoryModal.classList.remove("hidden");
+
+    if (typeof confetti === "function") {
+        confetti({
+            particleCount: 150,
+            spread: 100,
+            origin: { y: 0.6 }
         });
-      }
-    }, 350);
-  }
+    }
 }
 
-// ========================================
-// НЕПРАВИЛЬНЫЙ ОТВЕТ
-// ========================================
+function initGame() {
+    completed = 0;
+    count1 = 0;
+    count2 = 0;
+    activeMushroom = null;
 
-function handleError(el) {
-  errorCross.classList.remove("hidden");
+    score1.textContent = "0";
+    score2.textContent = "0";
 
-  errorCross.style.animation = "none";
+    progressCount.textContent = "0";
+    progressBar.style.width = "0%";
 
-  void errorCross.offsetWidth;
+    victoryModal.classList.add("hidden");
+    errorMessage.classList.add("hidden");
 
-  errorCross.style.animation =
-    "errorPop 0.4s ease forwards";
-
-  returnToHome(el);
-
-  setTimeout(() => {
-    errorCross.classList.add("hidden");
-  }, 420);
+    createMushrooms();
+    renderMushrooms();
 }
 
-// ========================================
-// СЧЁТ И ПРОГРЕСС
-// ========================================
+restartButton.addEventListener("click", initGame);
 
-function updateUI() {
-  score1El.textContent = score1;
-  score2El.textContent = score2;
-
-  const progressPercent =
-    (totalSolved / totalMushrooms) * 100;
-
-  progressBar.style.width = `${progressPercent}%`;
-}
-
-// ========================================
-// ПЕРЕРАСЧЁТ ПРИ ИЗМЕНЕНИИ ЭКРАНА
-// ========================================
+let resizeTimeout;
 
 window.addEventListener("resize", () => {
-  clearTimeout(resizeTimer);
+    clearTimeout(resizeTimeout);
 
-  resizeTimer = setTimeout(() => {
-    // Перестраиваем поле только если игра ещё не закончена
-    if (totalSolved < totalMushrooms) {
-      initGame();
-    }
-  }, 200);
+    resizeTimeout = setTimeout(() => {
+        if (!activeMushroom) {
+            renderMushrooms();
+        }
+    }, 150);
 });
 
-// Запускаем игру после загрузки страницы
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initGame);
-} else {
-  initGame();
-}
+initGame();
