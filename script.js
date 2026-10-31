@@ -18,8 +18,9 @@ let totalSolved = 0;
 const totalMushrooms = list1.length + list2.length;
 
 let remainingPool = [];
-let activeMushroomsOnField = 0;
-const MAX_ON_FIELD = 8; // Одновременно на поле находится до 8 грибов, освободилось место -> появился новый
+// Слот-система для идеального размещения без наложений
+let gridSlots = [];
+let activeMushroomsMap = new Map(); // Хранит грибы по их слотам
 
 const gameField = document.getElementById("game-field");
 const score1El = document.getElementById("score-1");
@@ -34,32 +35,61 @@ function initGame() {
   score1 = 0;
   score2 = 0;
   totalSolved = 0;
-  activeMushroomsOnField = 0;
+  activeMushroomsMap.clear();
   updateUI();
   gameField.innerHTML = "";
   victoryModal.classList.add("hidden");
 
-  // Собираем полный пул и перемешиваем
   remainingPool = [
     ...list1.map(word => ({ word, target: 1 })),
     ...list2.map(word => ({ word, target: 2 }))
   ];
   remainingPool.sort(() => Math.random() - 0.5);
 
-  // Заполняем поле первой порцией грибов
+  setupGridSlots();
   spawnNextBatch();
 }
 
-// Заполняет поле грибами до лимита MAX_ON_FIELD, находя свободные слоты
+// Создаем безопасную сетку слотов на основе размеров игрового поля
+function setupGridSlots() {
+  gridSlots = [];
+  const fieldWidth = gameField.clientWidth || (window.innerWidth - 20);
+  const fieldHeight = gameField.clientHeight - 20;
+
+  const itemWidth = 80;  // ширина гриба + отступ
+  const itemHeight = 90; // высота гриба + отступ
+
+  const cols = Math.floor(fieldWidth / itemWidth) || 4;
+  const rows = Math.floor(fieldHeight / itemHeight) || 3;
+
+  const cellW = fieldWidth / cols;
+  const cellH = fieldHeight / rows;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const posX = c * cellW + (cellW - 75) / 2;
+      const posY = r * cellH + (cellH - 85) / 2;
+      gridSlots.push({ row: r, col: c, x: Math.max(5, posX), y: Math.max(5, posY), occupied: false });
+    }
+  }
+
+  // Перемешиваем слоты, чтобы грибы появлялись в случайных местах поля
+  gridSlots.sort(() => Math.random() - 0.5);
+}
+
+// Заполняем свободные слоты грибами
 function spawnNextBatch() {
-  while (activeMushroomsOnField < MAX_ON_FIELD && remainingPool.length > 0) {
-    const item = remainingPool.pop();
-    activeMushroomsOnField++;
-    createMushroomWithSmartPosition(item.word, item.target);
+  for (let i = 0; i < gridSlots.length && remainingPool.length > 0; i++) {
+    const slot = gridSlots[i];
+    if (!slot.occupied) {
+      const item = remainingPool.pop();
+      slot.occupied = true;
+      createMushroomInSlot(item.word, item.target, slot);
+    }
   }
 }
 
-function createMushroomWithSmartPosition(word, targetBasket) {
+function createMushroomInSlot(word, targetBasket, slot) {
   const el = document.createElement("div");
   el.className = "mushroom";
   el.dataset.target = targetBasket;
@@ -70,22 +100,15 @@ function createMushroomWithSmartPosition(word, targetBasket) {
     <div class="mushroom-text">${word}</div>
   `;
 
-  gameField.appendChild(el);
+  el.style.left = `${slot.x}px`;
+  el.style.top = `${slot.y}px`;
 
-  // Вычисляем размеры и подбираем свободные координаты без наложения
-  const fieldWidth = gameField.clientWidth - 90;
-  const fieldHeight = gameField.clientHeight - 100;
+  el.dataset.homeX = slot.x;
+  el.dataset.homeY = slot.y;
 
-  let posX = 10 + Math.random() * Math.max(50, fieldWidth);
-  let posY = 10 + Math.random() * Math.max(50, fieldHeight);
-
-  el.style.left = `${posX}px`;
-  el.style.top = `${posY}px`;
-
-  el.dataset.homeX = posX;
-  el.dataset.homeY = posY;
-
+  activeMushroomsMap.set(el, slot);
   addDragListeners(el);
+  gameField.appendChild(el);
 }
 
 function addDragListeners(el) {
@@ -203,8 +226,14 @@ function handleSuccess(el, basketEl, basketNum) {
   else score2++;
   
   totalSolved++;
-  activeMushroomsOnField--;
   updateUI();
+
+  // Освобождаем слот ушедшего гриба
+  const slot = activeMushroomsMap.get(el);
+  if (slot) {
+    slot.occupied = false;
+    activeMushroomsMap.delete(el);
+  }
 
   const basketRect = basketEl.getBoundingClientRect();
   const elRect = el.getBoundingClientRect();
@@ -221,7 +250,7 @@ function handleSuccess(el, basketEl, basketNum) {
 
   setTimeout(() => {
     el.remove();
-    // Как только гриб улетел в корзину, подтягиваем следующий на поле!
+    // Появляется новый гриб на освободившееся место
     spawnNextBatch();
   }, 400);
 
@@ -269,3 +298,6 @@ function updateUI() {
 }
 
 window.addEventListener("load", initGame);
+window.addEventListener("resize", () => {
+  if (totalSolved === 0) initGame();
+});
