@@ -144,6 +144,9 @@ function startDrag(event) {
     const mushroom = event.currentTarget;
     const rect = mushroom.getBoundingClientRect();
 
+    mushroom.dataset.originalLeft = mushroom.style.left;
+    mushroom.dataset.originalTop = mushroom.style.top;
+
     activeMushroom = mushroom;
 
     dragOffsetX = event.clientX - rect.left;
@@ -216,20 +219,28 @@ function endDrag(event) {
     } else if (over2) {
         checkAnswer(mushroom, 2);
     } else {
-        renderMushrooms();
+        mushroom.style.left = mushroom.dataset.originalLeft;
+        mushroom.style.top = mushroom.dataset.originalTop;
     }
 }
 
 function cancelDrag() {
     if (!activeMushroom) return;
 
-    activeMushroom.classList.remove("dragging");
+    const mushroom = activeMushroom;
+
+    mushroom.classList.remove("dragging");
+    mushroom.removeEventListener("pointermove", moveDrag);
+    mushroom.removeEventListener("pointerup", endDrag);
+    mushroom.removeEventListener("pointercancel", cancelDrag);
+
     activeMushroom = null;
 
     basket1.classList.remove("drag-over");
     basket2.classList.remove("drag-over");
 
-    renderMushrooms();
+    mushroom.style.left = mushroom.dataset.originalLeft;
+    mushroom.style.top = mushroom.dataset.originalTop;
 }
 
 function checkAnswer(element, basketNumber) {
@@ -245,28 +256,23 @@ function checkAnswer(element, basketNumber) {
         }
 
         completed++;
-
         updateProgress();
-
-        element.style.transition = "transform 0.2s, opacity 0.2s";
-        element.style.transform = "scale(0)";
-        element.style.opacity = "0";
 
         mushrooms = mushrooms.filter(
             item => item.word !== element.dataset.word
         );
 
-        setTimeout(() => {
-            renderMushrooms();
+        element.remove();
 
-            if (completed === TOTAL) {
-                showVictory();
-            }
-        }, 180);
+        if (completed === TOTAL) {
+            showVictory();
+        }
 
     } else {
         showError();
-        renderMushrooms();
+
+        element.style.left = element.dataset.originalLeft;
+        element.style.top = element.dataset.originalTop;
     }
 }
 
