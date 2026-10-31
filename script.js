@@ -49,7 +49,7 @@ function initGame() {
   spawnNextBatch();
 }
 
-// УМНАЯ СЕТКА: подстраивается под экран, чтобы грибы не уходили вниз
+// РАВНОМЕРНАЯ СЕТКА: СТРОГО 3 КОЛОНКИ НА 2 РЯДА (МАКСИМУМ 6 ЭЛЕМЕНТОВ НА ЭКРАНЕ)
 function setupGridSlots() {
   gridSlots = [];
   
@@ -57,31 +57,28 @@ function setupGridSlots() {
   const fieldWidth = rect.width;
   const fieldHeight = rect.height;
 
-  // Компактные размеры гриба с отступами
-  const mushroomW = 70;
-  const mushroomH = 75;
-
-  // Вычисляем сколько колонок помещается по ширине (минимум 4)
-  const cols = Math.max(4, Math.floor(fieldWidth / mushroomW));
-  const rows = Math.max(3, Math.floor(fieldHeight / mushroomH));
+  // Фиксированная сетка 3 колонки x 2 ряда
+  const cols = 3;
+  const rows = 2;
 
   const cellW = fieldWidth / cols;
   const cellH = fieldHeight / rows;
+
+  const mushroomW = 66;
+  const mushroomH = 74;
 
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       const posX = c * cellW + (cellW - mushroomW) / 2;
       const posY = r * cellH + (cellH - mushroomH) / 2;
 
-      const safeX = Math.max(2, Math.min(posX, fieldWidth - mushroomW - 2));
-      const safeY = Math.max(2, Math.min(posY, fieldHeight - mushroomH - 2));
-
-      gridSlots.push({ x: safeX, y: safeY, occupied: false });
+      gridSlots.push({ 
+        x: Math.max(5, Math.min(posX, fieldWidth - mushroomW - 5)), 
+        y: Math.max(5, Math.min(posY, fieldHeight - mushroomH - 5)), 
+        occupied: false 
+      });
     }
   }
-
-  // Перемешиваем слоты, чтобы грибы появлялись в случайных ячейках сетки
-  gridSlots.sort(() => Math.random() - 0.5);
 }
 
 function spawnNextBatch() {
