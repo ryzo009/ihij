@@ -34,10 +34,12 @@ let mushrooms = [];
 let completed = 0;
 let count1 = 0;
 let count2 = 0;
+
 let activeMushroom = null;
 let dragOffsetX = 0;
 let dragOffsetY = 0;
 let errorTimer = null;
+let resizeTimeout = null;
 
 function shuffle(array) {
     const result = [...array];
@@ -51,12 +53,10 @@ function shuffle(array) {
 }
 
 function createMushrooms() {
-    mushrooms = [
+    mushrooms = shuffle([
         ...list1.map(word => ({ word, type: 1 })),
         ...list2.map(word => ({ word, type: 2 }))
-    ];
-
-    mushrooms = shuffle(mushrooms);
+    ]);
 }
 
 function getMushroomSize() {
@@ -79,7 +79,6 @@ function calculatePositions() {
     );
 
     const rows = Math.ceil(mushrooms.length / columns);
-
     const totalHeight = rows * (size.height + gapY) - gapY;
     const startY = Math.max(4, (fieldHeight - totalHeight) / 2);
 
@@ -109,8 +108,7 @@ function calculatePositions() {
 function renderMushrooms() {
     if (activeMushroom) return;
 
-    field.innerHTML = "";
-
+    const fragment = document.createDocumentFragment();
     const positions = calculatePositions();
 
     mushrooms.forEach((mushroom, index) => {
@@ -130,10 +128,14 @@ function renderMushrooms() {
             <div class="mushroom-word">${mushroom.word}</div>
         `;
 
-        element.addEventListener("pointerdown", startDrag);
+        element.addEventListener("pointerdown", startDrag, {
+            passive: false
+        });
 
-        field.appendChild(element);
+        fragment.appendChild(element);
     });
+
+    field.replaceChildren(fragment);
 }
 
 function startDrag(event) {
@@ -155,7 +157,10 @@ function startDrag(event) {
     mushroom.classList.add("dragging");
     mushroom.setPointerCapture(event.pointerId);
 
-    mushroom.addEventListener("pointermove", moveDrag);
+    mushroom.addEventListener("pointermove", moveDrag, {
+        passive: false
+    });
+
     mushroom.addEventListener("pointerup", endDrag);
     mushroom.addEventListener("pointercancel", cancelDrag);
 }
@@ -173,15 +178,11 @@ function moveDrag(event) {
     activeMushroom.style.left = `${x}px`;
     activeMushroom.style.top = `${y}px`;
 
-    basket1.classList.toggle(
-        "drag-over",
-        isOverBasket(event, basket1)
-    );
+    const over1 = isOverBasket(event, basket1);
+    const over2 = isOverBasket(event, basket2);
 
-    basket2.classList.toggle(
-        "drag-over",
-        isOverBasket(event, basket2)
-    );
+    basket1.classList.toggle("drag-over", over1);
+    basket2.classList.toggle("drag-over", over2);
 }
 
 function isOverBasket(event, basket) {
@@ -195,6 +196,12 @@ function isOverBasket(event, basket) {
     );
 }
 
+function removeDragListeners(mushroom) {
+    mushroom.removeEventListener("pointermove", moveDrag);
+    mushroom.removeEventListener("pointerup", endDrag);
+    mushroom.removeEventListener("pointercancel", cancelDrag);
+}
+
 function endDrag(event) {
     if (!activeMushroom) return;
 
@@ -204,10 +211,7 @@ function endDrag(event) {
     const over2 = isOverBasket(event, basket2);
 
     mushroom.classList.remove("dragging");
-
-    mushroom.removeEventListener("pointermove", moveDrag);
-    mushroom.removeEventListener("pointerup", endDrag);
-    mushroom.removeEventListener("pointercancel", cancelDrag);
+    removeDragListeners(mushroom);
 
     basket1.classList.remove("drag-over");
     basket2.classList.remove("drag-over");
@@ -219,8 +223,7 @@ function endDrag(event) {
     } else if (over2) {
         checkAnswer(mushroom, 2);
     } else {
-        mushroom.style.left = mushroom.dataset.originalLeft;
-        mushroom.style.top = mushroom.dataset.originalTop;
+        returnMushroom(mushroom);
     }
 }
 
@@ -230,15 +233,17 @@ function cancelDrag() {
     const mushroom = activeMushroom;
 
     mushroom.classList.remove("dragging");
-    mushroom.removeEventListener("pointermove", moveDrag);
-    mushroom.removeEventListener("pointerup", endDrag);
-    mushroom.removeEventListener("pointercancel", cancelDrag);
+    removeDragListeners(mushroom);
 
     activeMushroom = null;
 
     basket1.classList.remove("drag-over");
     basket2.classList.remove("drag-over");
 
+    returnMushroom(mushroom);
+}
+
+function returnMushroom(mushroom) {
     mushroom.style.left = mushroom.dataset.originalLeft;
     mushroom.style.top = mushroom.dataset.originalTop;
 }
@@ -258,8 +263,10 @@ function checkAnswer(element, basketNumber) {
         completed++;
         updateProgress();
 
+        const word = element.dataset.word;
+
         mushrooms = mushrooms.filter(
-            item => item.word !== element.dataset.word
+            item => item.word !== word
         );
 
         element.remove();
@@ -270,9 +277,7 @@ function checkAnswer(element, basketNumber) {
 
     } else {
         showError();
-
-        element.style.left = element.dataset.originalLeft;
-        element.style.top = element.dataset.originalTop;
+        returnMushroom(element);
     }
 }
 
@@ -311,6 +316,8 @@ function initGame() {
     count2 = 0;
     activeMushroom = null;
 
+    clearTimeout(errorTimer);
+
     score1.textContent = "0";
     score2.textContent = "0";
 
@@ -326,8 +333,6 @@ function initGame() {
 
 restartButton.addEventListener("click", initGame);
 
-let resizeTimeout;
-
 window.addEventListener("resize", () => {
     clearTimeout(resizeTimeout);
 
@@ -335,7 +340,7 @@ window.addEventListener("resize", () => {
         if (!activeMushroom) {
             renderMushrooms();
         }
-    }, 150);
+    }, 250);
 });
 
 initGame();
