@@ -148,13 +148,47 @@ function renderMushrooms() {
     field.replaceChildren(fragment);
 }
 
+// Новый гриб занимает ближайшее свободное место
+function fillEmptySpot(removedMushroom) {
+    const emptyX = parseFloat(removedMushroom.dataset.originalLeft);
+    const emptyY = parseFloat(removedMushroom.dataset.originalTop);
+
+    const remainingMushrooms = Array.from(
+        field.querySelectorAll(".mushroom")
+    ).filter(mushroom => mushroom !== removedMushroom);
+
+    if (remainingMushrooms.length === 0) return;
+
+    let nearestMushroom = null;
+    let nearestDistance = Infinity;
+
+    remainingMushrooms.forEach(mushroom => {
+        const x = parseFloat(mushroom.style.left);
+        const y = parseFloat(mushroom.style.top);
+
+        const distance = Math.hypot(
+            x - emptyX,
+            y - emptyY
+        );
+
+        if (distance < nearestDistance) {
+            nearestDistance = distance;
+            nearestMushroom = mushroom;
+        }
+    });
+
+    if (nearestMushroom) {
+        nearestMushroom.style.left = `${emptyX}px`;
+        nearestMushroom.style.top = `${emptyY}px`;
+    }
+}
+
 function startDrag(event) {
     if (activeMushroom) return;
 
     event.preventDefault();
 
     const mushroom = event.currentTarget;
-    const rect = mushroom.getBoundingClientRect();
 
     activeMushroom = mushroom;
 
@@ -169,7 +203,6 @@ function startDrag(event) {
     basket1Rect = basket1.getBoundingClientRect();
     basket2Rect = basket2.getBoundingClientRect();
 
-    // Отключаем анимацию transform на время движения
     mushroom.style.transition = "none";
 
     mushroom.classList.add("dragging");
@@ -207,7 +240,6 @@ function updateDragPosition() {
     const dx = pendingPointer.x - startPointerX;
     const dy = pendingPointer.y - startPointerY;
 
-    // Двигаем гриб через transform, не меняя left и top
     activeMushroom.style.transform =
         `translate3d(${dx}px, ${dy}px, 0) scale(1.16)`;
 
@@ -339,6 +371,9 @@ function checkAnswer(element, basketNumber) {
         if (index !== -1) {
             mushrooms.splice(index, 1);
         }
+
+        // Заполняем освободившееся место ближайшим грибом
+        fillEmptySpot(element);
 
         element.remove();
 
