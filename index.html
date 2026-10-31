@@ -2,17 +2,16 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Грибной тренажер: Род и склонение существительных</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
 
-  <!-- Лесной фон со светлячками -->
+  <!-- Лесной фон -->
   <div class="forest-bg">
     <div class="sunbeams"></div>
-    <div class="firefly"></div>
     <div class="firefly"></div>
     <div class="firefly"></div>
   </div>
@@ -25,7 +24,7 @@
     </div>
   </header>
 
-  <!-- Игровое поле -->
+  <!-- Игровое поле (строго ограничено) -->
   <main id="game-field" class="game-field"></main>
 
   <!-- Ошибка -->
@@ -41,17 +40,13 @@
   </div>
 
   <!-- Корзины -->
-  <div class="baskets-container">
+  <footer class="baskets-container">
     <div id="basket-1" class="basket-item fem-basket" data-basket="1">
       <div class="basket-counter" id="score-1">0</div>
       <div class="basket-handle"></div>
-      
-      <!-- Задняя часть корзины -->
       <div class="basket-body">
         <div class="basket-weave"></div>
       </div>
-
-      <!-- Передняя часть (бортик и плашка), за которую погружается гриб -->
       <div class="basket-front-wall">
         <div class="basket-weave"></div>
         <div class="basket-rim"></div>
@@ -62,20 +57,16 @@
     <div id="basket-2" class="basket-item masc-basket" data-basket="2">
       <div class="basket-counter" id="score-2">0</div>
       <div class="basket-handle"></div>
-      
-      <!-- Задняя часть корзины -->
       <div class="basket-body">
         <div class="basket-weave"></div>
       </div>
-
-      <!-- Передняя часть (бортик и плашка), за которую погружается гриб -->
       <div class="basket-front-wall">
         <div class="basket-weave"></div>
         <div class="basket-rim"></div>
         <div class="basket-label">2-е склонение</div>
       </div>
     </div>
-  </div>
+  </footer>
 
   <script src="script.js"></script>
 </body>
