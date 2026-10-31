@@ -17,6 +17,10 @@ let score2 = 0;
 let totalSolved = 0;
 const totalMushrooms = list1.length + list2.length;
 
+let remainingPool = [];
+let activeMushroomsOnField = 0;
+const MAX_ON_FIELD = 8; // Одновременно на поле находится до 8 грибов, освободилось место -> появился новый
+
 const gameField = document.getElementById("game-field");
 const score1El = document.getElementById("score-1");
 const score2El = document.getElementById("score-2");
@@ -30,52 +34,35 @@ function initGame() {
   score1 = 0;
   score2 = 0;
   totalSolved = 0;
+  activeMushroomsOnField = 0;
   updateUI();
   gameField.innerHTML = "";
   victoryModal.classList.add("hidden");
 
-  const allWords = [
+  // Собираем полный пул и перемешиваем
+  remainingPool = [
     ...list1.map(word => ({ word, target: 1 })),
     ...list2.map(word => ({ word, target: 2 }))
   ];
+  remainingPool.sort(() => Math.random() - 0.5);
 
-  const fieldWidth = gameField.clientWidth || (window.innerWidth - 10);
-  const cols = Math.floor(fieldWidth / 95) || 4;
-  const rows = Math.ceil(allWords.length / cols);
-  const cellWidth = fieldWidth / cols;
-  const cellHeight = 98;
-
-  const positions = [];
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      if (positions.length < allWords.length) {
-        positions.push({ row: r, col: c });
-      }
-    }
-  }
-
-  allWords.sort(() => Math.random() - 0.5);
-  positions.sort(() => Math.random() - 0.5);
-
-  allWords.forEach((item, index) => {
-    const pos = positions[index];
-    createMushroom(item.word, item.target, pos.col, pos.row, cellWidth, cellHeight);
-  });
+  // Заполняем поле первой порцией грибов
+  spawnNextBatch();
 }
 
-function createMushroom(word, targetBasket, col, row, cellWidth, cellHeight) {
+// Заполняет поле грибами до лимита MAX_ON_FIELD, находя свободные слоты
+function spawnNextBatch() {
+  while (activeMushroomsOnField < MAX_ON_FIELD && remainingPool.length > 0) {
+    const item = remainingPool.pop();
+    activeMushroomsOnField++;
+    createMushroomWithSmartPosition(item.word, item.target);
+  }
+}
+
+function createMushroomWithSmartPosition(word, targetBasket) {
   const el = document.createElement("div");
   el.className = "mushroom";
   el.dataset.target = targetBasket;
-
-  const posX = Math.max(2, Math.min(col * cellWidth + (cellWidth - 85) / 2, window.innerWidth - 90));
-  const posY = Math.max(2, row * cellHeight);
-
-  el.style.left = `${posX}px`;
-  el.style.top = `${posY}px`;
-
-  el.dataset.homeX = posX;
-  el.dataset.homeY = posY;
 
   el.innerHTML = `
     <div class="mushroom-cap"></div>
@@ -83,8 +70,22 @@ function createMushroom(word, targetBasket, col, row, cellWidth, cellHeight) {
     <div class="mushroom-text">${word}</div>
   `;
 
-  addDragListeners(el);
   gameField.appendChild(el);
+
+  // Вычисляем размеры и подбираем свободные координаты без наложения
+  const fieldWidth = gameField.clientWidth - 90;
+  const fieldHeight = gameField.clientHeight - 100;
+
+  let posX = 10 + Math.random() * Math.max(50, fieldWidth);
+  let posY = 10 + Math.random() * Math.max(50, fieldHeight);
+
+  el.style.left = `${posX}px`;
+  el.style.top = `${posY}px`;
+
+  el.dataset.homeX = posX;
+  el.dataset.homeY = posY;
+
+  addDragListeners(el);
 }
 
 function addDragListeners(el) {
@@ -92,9 +93,7 @@ function addDragListeners(el) {
   let startX, startY, initialLeft, initialTop;
 
   const onStart = (e) => {
-    // ПОЛНЫЙ ЗАПРЕТ ВЫДЕЛЕНИЯ ТЕКСТА
     e.preventDefault();
-    
     isDragging = true;
     el.style.transition = "none";
     el.classList.add("dragging");
@@ -115,8 +114,6 @@ function addDragListeners(el) {
 
   const onMove = (e) => {
     if (!isDragging) return;
-    
-    // БЛОКИРУЕМ ВЫДЕЛЕНИЕ ПРИ ДВИЖЕНИИ МЫШИ
     e.preventDefault();
 
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -157,17 +154,17 @@ function checkDrop(el) {
   const b2Rect = basket2.getBoundingClientRect();
 
   const expandedB1 = {
-    left: b1Rect.left - 50,
-    right: b1Rect.right + 50,
-    top: b1Rect.top - 100,
-    bottom: b1Rect.bottom + 30
+    left: b1Rect.left - 40,
+    right: b1Rect.right + 40,
+    top: b1Rect.top - 80,
+    bottom: b1Rect.bottom + 20
   };
 
   const expandedB2 = {
-    left: b2Rect.left - 50,
-    right: b2Rect.right + 50,
-    top: b2Rect.top - 100,
-    bottom: b2Rect.bottom + 30
+    left: b2Rect.left - 40,
+    right: b2Rect.right + 40,
+    top: b2Rect.top - 80,
+    bottom: b2Rect.bottom + 20
   };
 
   const inBasket1 = isInside(mushroomCenter, expandedB1);
@@ -206,13 +203,14 @@ function handleSuccess(el, basketEl, basketNum) {
   else score2++;
   
   totalSolved++;
+  activeMushroomsOnField--;
   updateUI();
 
   const basketRect = basketEl.getBoundingClientRect();
   const elRect = el.getBoundingClientRect();
   
   const targetX = basketRect.left + (basketRect.width - elRect.width) / 2;
-  const targetY = basketRect.top + 35;
+  const targetY = basketRect.top + 30;
 
   el.classList.add("falling-in");
   el.style.transition = "all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)";
@@ -223,6 +221,8 @@ function handleSuccess(el, basketEl, basketNum) {
 
   setTimeout(() => {
     el.remove();
+    // Как только гриб улетел в корзину, подтягиваем следующий на поле!
+    spawnNextBatch();
   }, 400);
 
   basketEl.classList.remove("basket-bounce");
@@ -231,8 +231,8 @@ function handleSuccess(el, basketEl, basketNum) {
 
   if (window.confetti) {
     confetti({
-      particleCount: 30,
-      spread: 60,
+      particleCount: 25,
+      spread: 50,
       origin: {
         x: (basketRect.left + basketRect.width / 2) / window.innerWidth,
         y: basketRect.top / window.innerHeight
@@ -269,6 +269,3 @@ function updateUI() {
 }
 
 window.addEventListener("load", initGame);
-window.addEventListener("resize", () => {
-  if (totalSolved === 0) initGame();
-});
