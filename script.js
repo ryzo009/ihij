@@ -177,12 +177,6 @@ function moveDrag(event) {
 
     activeMushroom.style.left = `${x}px`;
     activeMushroom.style.top = `${y}px`;
-
-    const over1 = isOverBasket(event, basket1);
-    const over2 = isOverBasket(event, basket2);
-
-    basket1.classList.toggle("drag-over", over1);
-    basket2.classList.toggle("drag-over", over2);
 }
 
 function isOverBasket(event, basket) {
@@ -213,9 +207,6 @@ function endDrag(event) {
     mushroom.classList.remove("dragging");
     removeDragListeners(mushroom);
 
-    basket1.classList.remove("drag-over");
-    basket2.classList.remove("drag-over");
-
     activeMushroom = null;
 
     if (over1) {
@@ -236,9 +227,6 @@ function cancelDrag() {
     removeDragListeners(mushroom);
 
     activeMushroom = null;
-
-    basket1.classList.remove("drag-over");
-    basket2.classList.remove("drag-over");
 
     returnMushroom(mushroom);
 }
