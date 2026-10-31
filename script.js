@@ -17,8 +17,6 @@ let score2 = 0;
 let totalSolved = 0;
 const totalMushrooms = list1.length + list2.length;
 
-let activeMushroomsMap = new Map();
-
 const gameField = document.getElementById("game-field");
 const score1El = document.getElementById("score-1");
 const score2El = document.getElementById("score-2");
@@ -32,12 +30,10 @@ function initGame() {
   score1 = 0;
   score2 = 0;
   totalSolved = 0;
-  activeMushroomsMap.clear();
   updateUI();
   gameField.innerHTML = "";
   victoryModal.classList.add("hidden");
 
-  // Собираем абсолютно все грибы и перемешиваем их
   let allMushrooms = [
     ...list1.map(word => ({ word, target: 1 })),
     ...list2.map(word => ({ word, target: 2 }))
@@ -47,17 +43,14 @@ function initGame() {
   spawnAllMushrooms(allMushrooms);
 }
 
-// РАССТАНОВКА ВСЕХ ГРИБОВ СРАЗУ В АККУРАТНУЮ ПЛОТНУЮ СЕТКУ
 function spawnAllMushrooms(items) {
   const fieldWidth = gameField.clientWidth;
   const fieldHeight = gameField.clientHeight;
 
-  // Компактный размер гриба, чтобы все 72 штуки влезли на экран
-  const mushroomW = 58;
-  const mushroomH = 64;
+  const mushroomW = 56;
+  const mushroomH = 62;
 
-  // Вычисляем сколько колонок и рядов нужно для всех элементов
-  const cols = Math.floor(fieldWidth / (mushroomW + 4)) || 5;
+  const cols = Math.floor(fieldWidth / (mushroomW + 3)) || 6;
   const rows = Math.ceil(items.length / cols);
 
   const cellW = fieldWidth / cols;
@@ -79,7 +72,7 @@ function spawnAllMushrooms(items) {
 
 function createMushroomAt(word, targetBasket, x, y) {
   const el = document.createElement("div");
-  el.className = "mushroom compact-mushroom"; // компактный класс для текста и размеров
+  el.className = "mushroom compact-mushroom";
   el.dataset.target = targetBasket;
 
   el.innerHTML = `
@@ -159,3 +152,120 @@ function checkDrop(el) {
     x: rect.left + rect.width / 2,
     y: rect.top + rect.height / 2
   };
+
+  const b1Rect = basket1.getBoundingClientRect();
+  const b2Rect = basket2.getBoundingClientRect();
+
+  const expandedB1 = {
+    left: b1Rect.left - 30,
+    right: b1Rect.right + 30,
+    top: b1Rect.top - 60,
+    bottom: b1Rect.bottom + 15
+  };
+
+  const expandedB2 = {
+    left: b2Rect.left - 30,
+    right: b2Rect.right + 30,
+    top: b2Rect.top - 60,
+    bottom: b2Rect.bottom + 15
+  };
+
+  const inBasket1 = isInside(mushroomCenter, expandedB1);
+  const inBasket2 = isInside(mushroomCenter, expandedB2);
+
+  const target = parseInt(el.dataset.target);
+
+  if (inBasket1) {
+    if (target === 1) handleSuccess(el, basket1, 1);
+    else handleError(el);
+  } else if (inBasket2) {
+    if (target === 2) handleSuccess(el, basket2, 2);
+    else handleError(el);
+  } else {
+    returnToHome(el);
+  }
+}
+
+function isInside(point, rect) {
+  return (
+    point.x >= rect.left &&
+    point.x <= rect.right &&
+    point.y >= rect.top &&
+    point.y <= rect.bottom
+  );
+}
+
+function returnToHome(el) {
+  el.style.transition = "left 0.25s ease-out, top 0.25s ease-out";
+  el.style.left = `${el.dataset.homeX}px`;
+  el.style.top = `${el.dataset.homeY}px`;
+}
+
+function handleSuccess(el, basketEl, basketNum) {
+  if (basketNum === 1) score1++;
+  else score2++;
+  
+  totalSolved++;
+  updateUI();
+
+  const basketRect = basketEl.getBoundingClientRect();
+  const elRect = el.getBoundingClientRect();
+  
+  const targetX = basketRect.left + (basketRect.width - elRect.width) / 2;
+  const targetY = basketRect.top + 25;
+
+  el.classList.add("falling-in");
+  el.style.transition = "all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)";
+  el.style.left = `${targetX}px`;
+  el.style.top = `${targetY}px`;
+  el.style.transform = "scale(0.3) translateY(30px)";
+  el.style.opacity = "0";
+
+  setTimeout(() => {
+    el.remove();
+  }, 400);
+
+  basketEl.classList.remove("basket-bounce");
+  void basketEl.offsetWidth;
+  basketEl.classList.add("basket-bounce");
+
+  if (window.confetti) {
+    confetti({
+      particleCount: 25,
+      spread: 50,
+      origin: {
+        x: (basketRect.left + basketRect.width / 2) / window.innerWidth,
+        y: basketRect.top / window.innerHeight
+      }
+    });
+  }
+
+  if (totalSolved === totalMushrooms) {
+    setTimeout(() => {
+      victoryModal.classList.remove("hidden");
+      confetti({ particleCount: 120, spread: 90, origin: { y: 0.5 } });
+    }, 450);
+  }
+}
+
+function handleError(el) {
+  errorCross.classList.remove("hidden");
+  errorCross.style.animation = "none";
+  void errorCross.offsetWidth;
+  errorCross.style.animation = "popAndShake 0.4s ease forwards";
+
+  returnToHome(el);
+
+  setTimeout(() => {
+    errorCross.classList.add("hidden");
+  }, 400);
+}
+
+function updateUI() {
+  score1El.textContent = score1;
+  score2El.textContent = score2;
+  const progressPercent = (totalSolved / totalMushrooms) * 100;
+  progressBar.style.width = `${progressPercent}%`;
+}
+
+window.addEventListener("load", initGame);
