@@ -49,40 +49,41 @@ function initGame() {
   spawnNextBatch();
 }
 
-// РАСЧЕТ БЕЗОПАСНЫХ СЛОТОВ СТОГО ВНУТРИ ВИДИМОЙ ЗОНЫ
+// Создаем жесткую неизменяемую сетку слотов по размеру экрана
 function setupGridSlots() {
   gridSlots = [];
   
-  // Получаем точные физические размеры игрового поля в пикселях
-  const rect = gameField.getBoundingClientRect();
-  const fieldWidth = rect.width;
-  const fieldHeight = rect.height;
+  const fieldWidth = gameField.clientWidth;
+  const fieldHeight = gameField.clientHeight;
 
-  // Размеры гриба с запасом на отступы
   const mushroomW = 75;
-  const mushroomH = 80;
+  const mushroomH = 85;
 
-  // Рассчитываем количество столбцов и строк, чтобы они 100% влезли
-  const cols = Math.max(3, Math.floor(fieldWidth / mushroomW));
-  const rows = Math.max(2, Math.floor(fieldHeight / mushroomH));
+  // Рассчитываем сколько колонок и рядов гарантированно влезает без вылетов
+  const cols = Math.floor(fieldWidth / mushroomW) || 4;
+  const rows = Math.floor(fieldHeight / mushroomH) || 3;
 
-  const stepX = (fieldWidth - mushroomW) / Math.max(1, cols - 1);
-  const stepY = (fieldHeight - mushroomH) / Math.max(1, rows - 1);
+  const cellW = fieldWidth / cols;
+  const cellH = fieldHeight / rows;
 
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      // Координаты гарантированно отступают от краев поля
-      const posX = Math.max(5, Math.min(c * stepX, fieldWidth - mushroomW - 5));
-      const posY = Math.max(5, Math.min(r * stepY, fieldHeight - mushroomH - 5));
+      const posX = c * cellW + (cellW - mushroomW) / 2;
+      const posY = r * cellH + (cellH - mushroomH) / 2;
       
-      gridSlots.push({ row: r, col: c, x: posX, y: posY, occupied: false });
+      // Защита от выхода за границы контейнера
+      const safeX = Math.max(2, Math.min(posX, fieldWidth - mushroomW - 2));
+      const safeY = Math.max(2, Math.min(posY, fieldHeight - mushroomH - 2));
+
+      gridSlots.push({ x: safeX, y: safeY, occupied: false });
     }
   }
 
-  // Перемешиваем слоты для хаотичного вида
+  // Перемешиваем слоты, чтобы грибы появлялись в разных частях поля
   gridSlots.sort(() => Math.random() - 0.5);
 }
 
+// Заполняем только свободные пустые слоты
 function spawnNextBatch() {
   for (let i = 0; i < gridSlots.length && remainingPool.length > 0; i++) {
     const slot = gridSlots[i];
@@ -233,6 +234,7 @@ function handleSuccess(el, basketEl, basketNum) {
   totalSolved++;
   updateUI();
 
+  // Освобождаем слот ушедшего гриба, чтобы туда встал новый
   const slot = activeMushroomsMap.get(el);
   if (slot) {
     slot.occupied = false;
@@ -301,6 +303,4 @@ function updateUI() {
 }
 
 window.addEventListener("load", initGame);
-window.addEventListener("resize", () => {
-  setupGridSlots();
-});
+// Убрали автоматический перезапуск по resize, чтобы игра не ломала текущую расстановку при скролле на телефоне
