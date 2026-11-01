@@ -17,6 +17,10 @@ let score2 = 0;
 let totalSolved = 0;
 const totalMushrooms = list1.length + list2.length;
 
+let remainingPool = [];
+let gridSlots = [];
+let activeMushroomsMap = new Map();
+
 const gameField = document.getElementById("game-field");
 const score1El = document.getElementById("score-1");
 const score2El = document.getElementById("score-2");
@@ -30,49 +34,70 @@ function initGame() {
   score1 = 0;
   score2 = 0;
   totalSolved = 0;
+  activeMushroomsMap.clear();
   updateUI();
   gameField.innerHTML = "";
   victoryModal.classList.add("hidden");
 
-  let allMushrooms = [
+  remainingPool = [
     ...list1.map(word => ({ word, target: 1 })),
     ...list2.map(word => ({ word, target: 2 }))
   ];
-  allMushrooms.sort(() => Math.random() - 0.5);
+  remainingPool.sort(() => Math.random() - 0.5);
 
-  spawnAllMushrooms(allMushrooms);
+  setupGridSlots();
+  spawnNextBatch();
 }
 
-function spawnAllMushrooms(items) {
-  const fieldWidth = gameField.clientWidth;
-  const fieldHeight = gameField.clientHeight;
+// Строим СЕТКУ СЛОТОВ на основе реальных физических размеров видимого контейнера
+function setupGridSlots() {
+  gridSlots = [];
+  
+  const rect = gameField.getBoundingClientRect();
+  const fieldWidth = rect.width;
+  const fieldHeight = rect.height;
 
-  const mushroomW = 56;
-  const mushroomH = 62;
+  const mushroomW = 74;
+  const mushroomH = 82;
 
-  const cols = Math.floor(fieldWidth / (mushroomW + 3)) || 6;
-  const rows = Math.ceil(items.length / cols);
+  // Безопасное вычисление строк и колонок под размер экрана
+  const cols = Math.max(3, Math.floor(fieldWidth / mushroomW));
+  const rows = Math.max(2, Math.floor(fieldHeight / mushroomH));
 
   const cellW = fieldWidth / cols;
   const cellH = fieldHeight / rows;
 
-  items.forEach((item, index) => {
-    const r = Math.floor(index / cols);
-    const c = index % cols;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      // Ограничиваем координаты от вылета за границы
+      const posX = c * cellW + (cellW - mushroomW) / 2;
+      const posY = r * cellH + (cellH - mushroomH) / 2;
 
-    const posX = c * cellW + (cellW - mushroomW) / 2;
-    const posY = r * cellH + (cellH - mushroomH) / 2;
+      const safeX = Math.max(2, Math.min(posX, fieldWidth - mushroomW - 2));
+      const safeY = Math.max(2, Math.min(posY, fieldHeight - mushroomH - 2));
 
-    const safeX = Math.max(2, Math.min(posX, fieldWidth - mushroomW - 2));
-    const safeY = Math.max(2, Math.min(posY, fieldHeight - mushroomH - 2));
+      gridSlots.push({ x: safeX, y: safeY, occupied: false });
+    }
+  }
 
-    createMushroomAt(item.word, item.target, safeX, safeY);
-  });
+  // Перемешиваем слоты
+  gridSlots.sort(() => Math.random() - 0.5);
 }
 
-function createMushroomAt(word, targetBasket, x, y) {
+function spawnNextBatch() {
+  for (let i = 0; i < gridSlots.length && remainingPool.length > 0; i++) {
+    const slot = gridSlots[i];
+    if (!slot.occupied) {
+      const item = remainingPool.pop();
+      slot.occupied = true;
+      createMushroomInSlot(item.word, item.target, slot);
+    }
+  }
+}
+
+function createMushroomInSlot(word, targetBasket, slot) {
   const el = document.createElement("div");
-  el.className = "mushroom compact-mushroom";
+  el.className = "mushroom";
   el.dataset.target = targetBasket;
 
   el.innerHTML = `
@@ -81,12 +106,13 @@ function createMushroomAt(word, targetBasket, x, y) {
     <div class="mushroom-text">${word}</div>
   `;
 
-  el.style.left = `${x}px`;
-  el.style.top = `${y}px`;
+  el.style.left = `${slot.x}px`;
+  el.style.top = `${slot.y}px`;
 
-  el.dataset.homeX = x;
-  el.dataset.homeY = y;
+  el.dataset.homeX = slot.x;
+  el.dataset.homeY = slot.y;
 
+  activeMushroomsMap.set(el, slot);
   addDragListeners(el);
   gameField.appendChild(el);
 }
@@ -157,17 +183,17 @@ function checkDrop(el) {
   const b2Rect = basket2.getBoundingClientRect();
 
   const expandedB1 = {
-    left: b1Rect.left - 30,
-    right: b1Rect.right + 30,
-    top: b1Rect.top - 60,
-    bottom: b1Rect.bottom + 15
+    left: b1Rect.left - 40,
+    right: b1Rect.right + 40,
+    top: b1Rect.top - 80,
+    bottom: b1Rect.bottom + 20
   };
 
   const expandedB2 = {
-    left: b2Rect.left - 30,
-    right: b2Rect.right + 30,
-    top: b2Rect.top - 60,
-    bottom: b2Rect.bottom + 15
+    left: b2Rect.left - 40,
+    right: b2Rect.right + 40,
+    top: b2Rect.top - 80,
+    bottom: b2Rect.bottom + 20
   };
 
   const inBasket1 = isInside(mushroomCenter, expandedB1);
@@ -208,21 +234,28 @@ function handleSuccess(el, basketEl, basketNum) {
   totalSolved++;
   updateUI();
 
+  const slot = activeMushroomsMap.get(el);
+  if (slot) {
+    slot.occupied = false;
+    activeMushroomsMap.delete(el);
+  }
+
   const basketRect = basketEl.getBoundingClientRect();
   const elRect = el.getBoundingClientRect();
   
   const targetX = basketRect.left + (basketRect.width - elRect.width) / 2;
-  const targetY = basketRect.top + 25;
+  const targetY = basketRect.top + 30;
 
   el.classList.add("falling-in");
   el.style.transition = "all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)";
   el.style.left = `${targetX}px`;
   el.style.top = `${targetY}px`;
-  el.style.transform = "scale(0.3) translateY(30px)";
+  el.style.transform = "scale(0.3) translateY(35px)";
   el.style.opacity = "0";
 
   setTimeout(() => {
     el.remove();
+    spawnNextBatch();
   }, 400);
 
   basketEl.classList.remove("basket-bounce");
