@@ -49,21 +49,17 @@ function initGame() {
   spawnNextBatch();
 }
 
-// УМНАЯ СЕТКА: подстраивается под экран, чтобы грибы не уходили вниз
 function setupGridSlots() {
   gridSlots = [];
   
-  const rect = gameField.getBoundingClientRect();
-  const fieldWidth = rect.width;
-  const fieldHeight = rect.height;
+  const fieldWidth = gameField.clientWidth;
+  const fieldHeight = gameField.clientHeight;
 
-  // Компактные размеры гриба с отступами
-  const mushroomW = 70;
-  const mushroomH = 75;
+  const mushroomW = 75;
+  const mushroomH = 85;
 
-  // Вычисляем сколько колонок помещается по ширине (минимум 4)
-  const cols = Math.max(4, Math.floor(fieldWidth / mushroomW));
-  const rows = Math.max(3, Math.floor(fieldHeight / mushroomH));
+  const cols = Math.floor(fieldWidth / mushroomW) || 4;
+  const rows = Math.floor(fieldHeight / mushroomH) || 3;
 
   const cellW = fieldWidth / cols;
   const cellH = fieldHeight / rows;
@@ -72,7 +68,7 @@ function setupGridSlots() {
     for (let c = 0; c < cols; c++) {
       const posX = c * cellW + (cellW - mushroomW) / 2;
       const posY = r * cellH + (cellH - mushroomH) / 2;
-
+      
       const safeX = Math.max(2, Math.min(posX, fieldWidth - mushroomW - 2));
       const safeY = Math.max(2, Math.min(posY, fieldHeight - mushroomH - 2));
 
@@ -80,7 +76,6 @@ function setupGridSlots() {
     }
   }
 
-  // Перемешиваем слоты, чтобы грибы появлялись в случайных ячейках сетки
   gridSlots.sort(() => Math.random() - 0.5);
 }
 
@@ -183,17 +178,17 @@ function checkDrop(el) {
   const b2Rect = basket2.getBoundingClientRect();
 
   const expandedB1 = {
-    left: b1Rect.left - 30,
-    right: b1Rect.right + 30,
-    top: b1Rect.top - 60,
-    bottom: b1Rect.bottom + 15
+    left: b1Rect.left - 40,
+    right: b1Rect.right + 40,
+    top: b1Rect.top - 80,
+    bottom: b1Rect.bottom + 20
   };
 
   const expandedB2 = {
-    left: b2Rect.left - 30,
-    right: b2Rect.right + 30,
-    top: b2Rect.top - 60,
-    bottom: b2Rect.bottom + 15
+    left: b2Rect.left - 40,
+    right: b2Rect.right + 40,
+    top: b2Rect.top - 80,
+    bottom: b2Rect.bottom + 20
   };
 
   const inBasket1 = isInside(mushroomCenter, expandedB1);
@@ -244,13 +239,13 @@ function handleSuccess(el, basketEl, basketNum) {
   const elRect = el.getBoundingClientRect();
   
   const targetX = basketRect.left + (basketRect.width - elRect.width) / 2;
-  const targetY = basketRect.top + 25;
+  const targetY = basketRect.top + 30;
 
   el.classList.add("falling-in");
   el.style.transition = "all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)";
   el.style.left = `${targetX}px`;
   el.style.top = `${targetY}px`;
-  el.style.transform = "scale(0.3) translateY(30px)";
+  el.style.transform = "scale(0.3) translateY(35px)";
   el.style.opacity = "0";
 
   setTimeout(() => {
