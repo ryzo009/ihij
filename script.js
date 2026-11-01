@@ -49,7 +49,7 @@ function initGame() {
   spawnNextBatch();
 }
 
-// Строим СЕТКУ СЛОТОВ на основе реальных физических размеров видимого контейнера
+// СОЗДАЕМ ИДЕАЛЬНУЮ И РОВНУЮ СЕТКУ РЯДАМИ И КОЛОНКАМИ
 function setupGridSlots() {
   gridSlots = [];
   
@@ -57,31 +57,26 @@ function setupGridSlots() {
   const fieldWidth = rect.width;
   const fieldHeight = rect.height;
 
-  const mushroomW = 74;
-  const mushroomH = 82;
-
-  // Безопасное вычисление строк и колонок под размер экрана
-  const cols = Math.max(3, Math.floor(fieldWidth / mushroomW));
-  const rows = Math.max(2, Math.floor(fieldHeight / mushroomH));
+  // Ограничиваем сетку на 3 колонки и 2 ряда (максимум 6 ровных аккуратных слотов)
+  const cols = Math.min(3, Math.floor(fieldWidth / 85)) || 3;
+  const rows = Math.min(2, Math.floor(fieldHeight / 90)) || 2;
 
   const cellW = fieldWidth / cols;
   const cellH = fieldHeight / rows;
 
+  // Расположение по порядку (БЕЗ РАНДОМА!)
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      // Ограничиваем координаты от вылета за границы
-      const posX = c * cellW + (cellW - mushroomW) / 2;
-      const posY = r * cellH + (cellH - mushroomH) / 2;
+      const posX = c * cellW + (cellW - 75) / 2;
+      const posY = r * cellH + (cellH - 85) / 2;
 
-      const safeX = Math.max(2, Math.min(posX, fieldWidth - mushroomW - 2));
-      const safeY = Math.max(2, Math.min(posY, fieldHeight - mushroomH - 2));
-
-      gridSlots.push({ x: safeX, y: safeY, occupied: false });
+      gridSlots.push({ 
+        x: Math.max(5, Math.min(posX, fieldWidth - 80)), 
+        y: Math.max(5, Math.min(posY, fieldHeight - 90)), 
+        occupied: false 
+      });
     }
   }
-
-  // Перемешиваем слоты
-  gridSlots.sort(() => Math.random() - 0.5);
 }
 
 function spawnNextBatch() {
@@ -183,16 +178,16 @@ function checkDrop(el) {
   const b2Rect = basket2.getBoundingClientRect();
 
   const expandedB1 = {
-    left: b1Rect.left - 40,
-    right: b1Rect.right + 40,
-    top: b1Rect.top - 80,
+    left: b1Rect.left - 30,
+    right: b1Rect.right + 30,
+    top: b1Rect.top - 60,
     bottom: b1Rect.bottom + 20
   };
 
   const expandedB2 = {
-    left: b2Rect.left - 40,
-    right: b2Rect.right + 40,
-    top: b2Rect.top - 80,
+    left: b2Rect.left - 30,
+    right: b2Rect.right + 30,
+    top: b2Rect.top - 60,
     bottom: b2Rect.bottom + 20
   };
 
