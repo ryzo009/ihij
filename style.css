@@ -17,7 +17,7 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   height: 100vh;
-  height: 100dvh; /* Поддержка динамической высоты мобильных экранов */
+  height: 100dvh;
   width: 100vw;
   overflow: hidden;
   display: flex;
@@ -26,7 +26,180 @@ body {
   background: #020906;
 }
 
-/* Лесной фон */
+/* Элитный премиальный фон и дизайн стартового окна */
+.start-screen {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 50% 30%, #0d2b1d 0%, #04100a 60%, #010503 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5000;
+  padding: 15px;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.start-screen.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Карточка меню: фиксированная структура, ничего не скачет */
+.start-card {
+  background: linear-gradient(145deg, rgba(10, 26, 18, 0.92) 0%, rgba(4, 12, 8, 0.98) 100%);
+  border: 2px solid rgba(255, 183, 3, 0.4);
+  border-radius: 24px;
+  padding: 24px 28px;
+  width: 100%;
+  max-width: 420px;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  animation: startPopUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes startPopUp {
+  0% { transform: scale(0.85) translateY(20px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.start-card h2 {
+  color: #ffb703;
+  font-size: 1.8rem;
+  font-weight: 900;
+  margin-bottom: 4px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.start-subtitle {
+  color: #94d2bd;
+  font-size: 0.95rem;
+  margin-bottom: 18px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Стильная кнопка запуска */
+.start-btn {
+  background: linear-gradient(135deg, #ffb703 0%, #f77f00 100%);
+  color: #081c15;
+  border: none;
+  padding: 14px 36px;
+  font-size: 1.1rem;
+  font-weight: 900;
+  border-radius: 14px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(255, 183, 3, 0.4);
+  transition: all 0.2s ease;
+  width: 100%;
+  flex-shrink: 0;
+  margin-bottom: 16px;
+}
+
+.start-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(255, 183, 3, 0.6);
+  filter: brightness(1.05);
+}
+
+.start-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 4px 12px rgba(255, 183, 3, 0.3);
+}
+
+/* Информационный блок с правилами: фиксирован, текст внутри прокручивается при необходимости, ничего не двигает кнопку */
+.rule-box {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 183, 3, 0.2);
+  border-radius: 14px;
+  padding: 12px 14px;
+  text-align: left;
+  overflow-y: auto;
+  flex-grow: 1;
+  max-height: 250px;
+}
+
+/* Красивый кастомный скроллбар для блока правил */
+.rule-box::-webkit-scrollbar {
+  width: 5px;
+}
+.rule-box::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+.rule-box::-webkit-scrollbar-thumb {
+  background: rgba(255, 183, 3, 0.3);
+  border-radius: 10px;
+}
+
+.rule-box h3 {
+  color: #ffb703;
+  font-size: 0.9rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.rule-intro {
+  color: #b7b7a4;
+  font-size: 0.75rem;
+  margin-bottom: 10px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.rule-col {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 7px 10px;
+  margin-bottom: 6px;
+}
+
+.rule-col:last-child {
+  margin-bottom: 0;
+}
+
+.col-1 { border-left: 3px solid #ffb703; }
+.col-2 { border-left: 3px solid #4ea8de; }
+
+.badge-1 {
+  display: inline-block;
+  color: #ffb703;
+  font-weight: 900;
+  font-size: 0.78rem;
+  margin-bottom: 2px;
+}
+
+.badge-2 {
+  display: inline-block;
+  color: #4ea8de;
+  font-weight: 900;
+  font-size: 0.78rem;
+  margin-bottom: 2px;
+}
+
+.rule-col p {
+  color: #d8f3dc;
+  font-size: 0.74rem;
+  line-height: 1.35;
+  margin: 0;
+  font-weight: 400;
+}
+
+.rule-col em {
+  color: #a3b18a;
+  font-style: normal;
+}
+
+/* Фон */
 .forest-bg {
   position: absolute;
   inset: 0;
@@ -34,72 +207,60 @@ body {
     radial-gradient(ellipse at 50% -20%, rgba(130, 200, 255, 0.28) 0%, transparent 60%),
     radial-gradient(circle at 50% 100%, #03150d 0%, #081c15 40%, #020906 100%);
   z-index: 1;
-  transform: translateZ(0);
 }
 
 .sunbeams {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(160, 220, 255, 0.12) 0%, transparent 60%),
-              radial-gradient(ellipse at 30% 0%, rgba(255, 230, 150, 0.15) 0%, transparent 50%);
-  pointer-events: none;
-}
-
-.forest-bg::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 140px;
-  background: linear-gradient(0deg, rgba(10, 45, 32, 0.5) 0%, transparent 100%);
+  background: linear-gradient(180deg, rgba(160, 220, 255, 0.12) 0%, transparent 60%);
   pointer-events: none;
 }
 
 .firefly {
   position: absolute;
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
   background: #aaffaa;
   border-radius: 50%;
-  box-shadow: 0 0 8px #88ff88;
-  animation: floatFirefly 7s infinite ease-in-out;
+  box-shadow: 0 0 10px #88ff88;
+  animation: floatFirefly 6s infinite ease-in-out;
   pointer-events: none;
   z-index: 2;
 }
 
 @keyframes floatFirefly {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(0.7); opacity: 0.2; }
-  50% { transform: translate3d(10px, -20px, 0) scale(1.2); opacity: 0.9; }
+  0%, 100% { transform: translate3d(0, 0, 0) scale(0.6); opacity: 0.3; }
+  50% { transform: translate3d(15px, -25px, 0) scale(1.3); opacity: 1; }
 }
 
-/* Шапка */
+/* Шапка и заголовок */
 .app-header {
-  position: relative;
-  height: 50px;
-  padding: 6px 12px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 54px;
+  padding: 6px 10px;
   text-align: center;
-  background: rgba(8, 28, 21, 0.9);
+  background: rgba(8, 28, 21, 0.95);
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 3px 10px rgba(0,0,0,0.4);
   z-index: 20;
 }
 
 .app-header h1 {
-  font-size: 0.95rem;
-  color: #f4a261;
+  font-size: 1.05rem;
+  color: #ffb703;
   margin-bottom: 3px;
   font-weight: 900;
-  letter-spacing: 0.3px;
-  text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
 .progress-container {
   width: 100%;
-  max-width: 240px;
-  height: 6px;
+  max-width: 220px;
+  height: 5px;
   background: rgba(0, 0, 0, 0.5);
-  border-radius: 4px;
+  border-radius: 3px;
   margin: 0 auto;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -112,23 +273,23 @@ body {
   transition: width 0.3s ease-out;
 }
 
-/* Игровое поле — строго между шапкой и панелью корзин */
+/* Игровое поле */
 .game-field {
   position: absolute;
-  top: 55px;
-  left: 5px;
-  right: 5px;
-  bottom: 105px;
-  overflow: hidden;
+  top: 58px;
+  left: 8px;
+  right: 8px;
+  bottom: 110px; 
+  overflow: visible;
   z-index: 100;
   pointer-events: none;
 }
 
-/* ГРИБОЧЕК */
+/* Грибочки */
 .mushroom {
   position: absolute;
-  width: 72px;
-  height: 80px;
+  width: 78px;
+  height: 86px;
   cursor: grab;
   display: flex;
   flex-direction: column;
@@ -137,17 +298,16 @@ body {
   z-index: 150;
   pointer-events: auto;
   touch-action: none;
-  box-shadow: 0 5px 10px rgba(0,0,0,0.4);
-  border-radius: 16px;
-  animation: spawnMushroom 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  will-change: left, top, transform;
-  transform: translateZ(0);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+  border-radius: 14px;
+  animation: spawnDirect 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  will-change: transform, opacity;
   -webkit-user-drag: none !important;
 }
 
-@keyframes spawnMushroom {
-  0% { transform: scale(0) translate3d(0, 20px, 0); opacity: 0; }
-  100% { transform: scale(1) translate3d(0, 0, 0); opacity: 1; }
+@keyframes spawnDirect {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 .mushroom:active {
@@ -157,8 +317,8 @@ body {
 .mushroom.dragging {
   z-index: 9999 !important;
   animation: none !important;
-  transform: scale(1.15) rotate(-3deg) !important;
-  box-shadow: 0 10px 20px rgba(255, 183, 3, 0.6) !important;
+  transform: scale(1.18) rotate(-4deg) !important;
+  box-shadow: 0 12px 24px rgba(255, 183, 3, 0.7) !important;
   transition: none !important;
 }
 
@@ -168,11 +328,11 @@ body {
 }
 
 .mushroom-cap {
-  width: 66px;
-  height: 36px;
+  width: 70px;
+  height: 38px;
   background: linear-gradient(180deg, #5c3012 0%, #8c572b 55%, #a67244 100%);
-  border-radius: 40px 40px 12px 12px;
-  box-shadow: inset 0 -3px 5px rgba(0,0,0,0.6), inset 0 2px 4px rgba(255,255,255,0.4);
+  border-radius: 35px 35px 10px 10px;
+  box-shadow: inset 0 -2px 4px rgba(0,0,0,0.6);
   position: relative;
   border: 1px solid #231206;
 }
@@ -180,50 +340,51 @@ body {
 .mushroom-cap::after {
   content: '';
   position: absolute;
-  top: 4px;
-  left: 8px;
-  width: 18px;
-  height: 7px;
+  top: 3px;
+  left: 7px;
+  width: 16px;
+  height: 6px;
   background: rgba(255,255,255,0.45);
-  border-radius: 8px;
+  border-radius: 6px;
   transform: rotate(-15deg);
 }
 
 .mushroom-stem {
-  width: 24px;
+  width: 26px;
   height: 34px;
   background: linear-gradient(90deg, #d9d9d9 0%, #ffffff 50%, #bfbfbf 100%);
-  border-radius: 5px 5px 12px 12px;
-  margin-top: -5px;
-  box-shadow: inset 0 0 4px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.3);
+  border-radius: 4px 4px 10px 10px;
+  margin-top: -4px;
+  box-shadow: inset 0 0 3px rgba(0,0,0,0.3);
   border: 1px solid #a6a6a6;
 }
 
 .mushroom-text {
   position: absolute;
   bottom: 0px;
-  background: linear-gradient(180deg, #ffffff 0%, #f4f1de 100%);
-  padding: 2px 6px;
-  border-radius: 7px;
-  font-size: 0.72rem;
-  font-weight: 800;
-  color: #1d2d44;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.5);
+  background: #000000;
+  padding: 2px 5px;
+  border-radius: 5px;
+  font-size: 0.9rem;
+  font-weight: 900;
+  color: #ffffff;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.7);
   white-space: nowrap;
-  border: 1px solid #8c572b;
-  max-width: 88px;
+  border: 1px solid #ffb703;
+  max-width: 96px;
   overflow: hidden;
   text-overflow: ellipsis;
   pointer-events: none;
+  z-index: 160;
 }
 
-/* КОРЗИНЫ СНИЗУ */
+/* Корзины снизу */
 .baskets-container {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 100px;
+  height: 105px;
   display: flex;
   justify-content: space-around;
   align-items: flex-end;
@@ -233,8 +394,8 @@ body {
 }
 
 .basket-item {
-  width: 135px;
-  height: 85px;
+  width: 155px;
+  height: 98px;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -242,36 +403,32 @@ body {
   justify-content: flex-end;
   pointer-events: auto;
   transition: transform 0.2s ease;
-  will-change: transform;
-  transform: translateZ(0);
-  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.6));
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.6));
 }
 
 .basket-counter {
   position: absolute;
-  top: -9px;
+  top: -10px;
   background: #0d131a;
   color: #52b788;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: monospace;
   font-weight: bold;
-  font-size: 0.95rem;
-  padding: 1px 8px;
-  border-radius: 8px;
+  font-size: 1rem;
+  padding: 2px 8px;
+  border-radius: 6px;
   border: 2px solid #2a9d8f;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.6);
   z-index: 350;
 }
 
 .basket-handle {
   position: absolute;
-  top: 3px;
-  width: 72px;
-  height: 36px;
+  top: 2px;
+  width: 82px;
+  height: 42px;
   border: 5px solid #703d1c;
   border-bottom: none;
-  border-radius: 36px 36px 0 0;
+  border-radius: 42px 42px 0 0;
   z-index: 180;
-  box-shadow: inset 0 2px 3px rgba(255,255,255,0.25), 0 2px 4px rgba(0,0,0,0.4);
 }
 
 .fem-basket .basket-handle { border-color: #9e472a; }
@@ -279,14 +436,13 @@ body {
 
 .basket-body {
   width: 100%;
-  height: 54px;
+  height: 60px;
   background: linear-gradient(135deg, #6e4228 0%, #422413 100%);
-  border-radius: 8px 8px 18px 18px;
+  border-radius: 8px 8px 16px 16px;
   position: relative;
   overflow: hidden;
   border: 2px solid #231206;
   z-index: 200;
-  box-shadow: inset 0 2px 5px rgba(255,255,255,0.2), inset 0 -4px 8px rgba(0,0,0,0.6);
 }
 
 .fem-basket .basket-body { border-color: #d62828; }
@@ -298,12 +454,11 @@ body {
   left: 0;
   right: 0;
   width: 100%;
-  height: 44px;
+  height: 48px;
   background: linear-gradient(135deg, #6e4228 0%, #422413 100%);
-  border-radius: 0 0 18px 18px;
+  border-radius: 0 0 16px 16px;
   border: 2px solid #231206;
   border-top: none;
-  box-shadow: inset 0 2px 3px rgba(255,255,255,0.2), 0 4px 8px rgba(0,0,0,0.5);
   z-index: 300;
   pointer-events: none;
   display: flex;
@@ -318,17 +473,15 @@ body {
 
 .basket-rim {
   width: 100%;
-  height: 9px;
+  height: 10px;
   background: linear-gradient(180deg, #b07d5b 0%, #8c572b 100%);
-  border-bottom: 1.5px solid #231206;
-  border-radius: 4px 4px 0 0;
+  border-bottom: 1px solid #231206;
 }
 
 .basket-label {
   color: #ffb703;
   font-weight: 900;
-  font-size: 0.78rem;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 1);
+  font-size: 0.85rem;
   text-align: center;
   width: 90%;
   margin: 3px auto 0 auto;
@@ -337,19 +490,7 @@ body {
   padding: 2px 0;
   border-radius: 6px;
   border: 1px solid rgba(255, 183, 3, 0.4);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
   z-index: 310;
-}
-
-.basket-weave {
-  position: absolute;
-  inset: 0;
-  opacity: 0.45;
-  background-image: 
-    linear-gradient(90deg, rgba(0,0,0,0.45) 50%, transparent 50%),
-    linear-gradient(0deg, rgba(0,0,0,0.45) 50%, transparent 50%);
-  background-size: 12px 12px;
-  background-position: 0 0, 6px 6px;
 }
 
 .basket-bounce {
@@ -357,9 +498,9 @@ body {
 }
 
 @keyframes basketElasticBounce {
-  0% { transform: translate3d(0, 0, 0) scale(1); }
-  50% { transform: translate3d(0, -8px, 0) scale(1.05); }
-  100% { transform: translate3d(0, 0, 0) scale(1); }
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
 }
 
 .error-cross {
@@ -369,7 +510,6 @@ body {
   transform: translate(-50%, -50%);
   font-size: 7rem;
   color: #ff0033;
-  text-shadow: 0 0 20px rgba(255, 0, 51, 0.9);
   z-index: 3000;
   pointer-events: none;
   animation: errorPopShake 0.35s ease forwards;
@@ -400,7 +540,6 @@ body {
   max-width: 300px;
   width: 100%;
   border: 3px solid #ffb703;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.7);
 }
 
 .modal-content h2 { color: #1b4332; margin-bottom: 8px; font-size: 1.25rem; font-weight: 900; }
@@ -414,11 +553,137 @@ body {
   font-weight: bold;
   border-radius: 12px;
   cursor: pointer;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.3);
-}
-
-.modal-content button:active {
-  transform: scale(0.96);
 }
 
 .hidden { display: none !important; }
+
+/* === Уровни, таймер, звук, свои слова === */
+.app-header { height: 80px; }
+.game-field { top: 84px; }
+.stats-row { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 3px; color: #d8f3dc; font-size: 0.8rem; font-weight: 700; }
+.tool-btn { background: rgba(255,255,255,0.1); color: #ffb703; border: 1px solid rgba(255,183,3,0.4); border-radius: 8px; padding: 2px 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
+.level-row { display: flex; gap: 6px; width: 100%; margin-bottom: 8px; }
+.level-btn { flex: 1; background: rgba(255,255,255,0.06); color: #d8f3dc; border: 2px solid rgba(255,183,3,0.25); border-radius: 12px; padding: 7px 2px; font-size: 0.85rem; font-weight: 800; cursor: pointer; }
+.level-btn small { display: block; font-size: 0.65rem; font-weight: 500; color: #94d2bd; }
+.level-btn.active { background: rgba(255,183,3,0.2); border-color: #ffb703; color: #ffb703; }
+.record-line { color: #b7b7a4; font-size: 0.8rem; margin-bottom: 10px; text-align: center; }
+.tools-row { display: flex; gap: 8px; width: 100%; margin-bottom: 12px; flex-shrink: 0; }
+.tools-row .tool-btn { flex: 1; padding: 8px; font-size: 0.85rem; }
+.stars { font-size: 2rem; margin-bottom: 6px; }
+.new-record { color: #e76f51 !important; font-weight: 900 !important; }
+.modal-content .alt-btn { background: transparent; color: #2d6a4f; border: 2px solid #2d6a4f; }
+.words-modal { z-index: 6000; }
+.words-modal .modal-content { max-width: 420px; }
+.words-modal label { display: block; text-align: left; color: #1b4332; font-weight: 800; font-size: 0.85rem; margin: 8px 0 3px; }
+.words-modal textarea { width: 100%; height: 80px; border: 2px solid #ffb703; border-radius: 10px; padding: 6px 8px; font-size: 0.85rem; font-family: inherit; resize: none; user-select: text !important; -webkit-user-select: text !important; }
+.words-actions { display: flex; gap: 6px; margin-top: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* Окно победы: кнопки в ряд с отступом */
+#victory-modal .modal-content { max-width: 340px; }
+.result-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 4px; }
+.result-actions button { flex: 1 1 120px; }
+
+
+/* === Новое окно победы === */
+.victory { background: radial-gradient(circle at 50% 30%, rgba(13,43,29,0.93), rgba(1,5,3,0.97)); }
+.victory-card { position: relative; width: 100%; max-width: 360px; padding: 38px 22px 22px; border-radius: 26px; text-align: center; background: linear-gradient(160deg, rgba(14,40,28,0.98), rgba(4,14,9,0.99)); border: 2px solid rgba(255,183,3,0.55); box-shadow: 0 0 0 6px rgba(255,183,3,0.08), 0 24px 60px rgba(0,0,0,0.8), 0 0 50px rgba(255,183,3,0.18); animation: victoryPop 0.55s cubic-bezier(0.34,1.56,0.64,1) both; }
+@keyframes victoryPop { from { transform: scale(0.7) translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
+.victory-badge { position: absolute; top: -34px; left: 50%; width: 68px; height: 68px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.1rem; background: linear-gradient(135deg, #ffd166, #f77f00); box-shadow: 0 6px 20px rgba(255,183,3,0.55); animation: badgeBob 2.4s ease-in-out infinite; }
+@keyframes badgeBob { 0%, 100% { transform: translateX(-50%) translateY(0) rotate(-4deg); } 50% { transform: translateX(-50%) translateY(-5px) rotate(4deg); } }
+.victory-card h2 { margin: 14px 0 4px; font-size: 1.9rem; font-weight: 900; background: linear-gradient(90deg, #ffd166, #ffb703, #f77f00); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.victory-msg { color: #94d2bd; font-size: 0.9rem; font-weight: 600; margin-bottom: 10px; }
+.victory-card .stars { display: flex; justify-content: center; gap: 6px; margin-bottom: 14px; }
+.star { font-size: 3rem; line-height: 1; color: rgba(255,255,255,0.15); transform: scale(0); animation: starIn 0.5s cubic-bezier(0.34,1.8,0.64,1) forwards; }
+.star.on { color: #ffcc33; text-shadow: 0 0 18px rgba(255,183,3,0.8); }
+@keyframes starIn { from { transform: scale(0) rotate(-120deg); } to { transform: scale(1) rotate(0); } }
+.stat-chips { display: flex; gap: 8px; margin-bottom: 14px; }
+.chip { flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,183,3,0.2); border-radius: 14px; padding: 8px 4px; display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.chip span { font-size: 1.1rem; }
+.chip b { color: #fff; font-size: 1.25rem; font-weight: 900; }
+.chip small { color: #94d2bd; font-size: 0.68rem; font-weight: 600; }
+.victory-card .new-record { margin: 0 0 14px; padding: 6px; color: #ffb703 !important; font-weight: 900; font-size: 0.9rem; background: rgba(255,183,3,0.12); border-radius: 10px; }
+.victory-card .result-actions { display: flex; gap: 10px; flex-wrap: wrap; margin: 0; }
+.victory-card button { flex: 1 1 130px; padding: 12px 10px; border-radius: 14px; font-size: 1rem; font-weight: 900; font-family: inherit; cursor: pointer; border: 2px solid transparent; }
+.victory-card button:active { transform: translateY(1px); }
+.btn-primary { background: linear-gradient(135deg, #ffb703, #f77f00); color: #081c15; box-shadow: 0 6px 18px rgba(255,183,3,0.4); }
+.btn-ghost { background: transparent; color: #d8f3dc; border-color: rgba(216,243,220,0.4) !important; }
+
+/* Грибочек масштабируется целиком, чтобы весь набор помещался над корзинами */
+.mushroom-inner { position: absolute; left: 0; top: 0; width: 78px; height: 86px; transform-origin: 0 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+
+/* Пока грибочек двигается, он всегда поверх корзин и не «проваливается» под их текстуру */
+.game-field.lift { z-index: 400; }
+
+
+/* === Атмосфера и анимации === */
+.fx { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.dawn { position: absolute; inset: 0; opacity: var(--p, 0); transition: opacity 1.2s;
+  background: radial-gradient(ellipse at 50% 110%, rgba(255,170,80,0.55), transparent 62%), linear-gradient(180deg, rgba(120,190,255,0.3), rgba(255,200,140,0.22) 70%, transparent); }
+.forest-bg .sunbeams { opacity: calc(0.7 + var(--p, 0) * 0.3); }
+.fx-fire { position: absolute; inset: 0; opacity: calc(1 - var(--p, 0) * 0.7); transition: opacity 1.2s; }
+.ray { position: absolute; top: -5%; width: 150px; height: 85%; clip-path: polygon(35% 0, 65% 0, 100% 100%, 0 100%);
+  background: linear-gradient(180deg, rgba(190,230,255,0.3), transparent 85%); animation: rayFlicker 6s ease-in-out infinite; }
+@keyframes rayFlicker { 0%, 100% { opacity: 0.15; } 40% { opacity: 0.55; } 70% { opacity: 0.3; } }
+.fog { position: absolute; left: -20%; right: -20%; bottom: 0; height: 38%; animation: fogDrift 18s ease-in-out infinite alternate;
+  background: radial-gradient(ellipse at 30% 100%, rgba(190,220,210,0.2), transparent 60%), radial-gradient(ellipse at 75% 100%, rgba(190,220,210,0.15), transparent 55%); }
+.fog2 { height: 28%; animation-duration: 26s; animation-direction: alternate-reverse; opacity: 0.8; }
+@keyframes fogDrift { to { transform: translateX(10%); } }
+.leaf { position: absolute; top: 0; opacity: 0.7; animation: leafFall linear infinite; }
+@keyframes leafFall {
+  0% { transform: translate3d(0, -10vh, 0) rotate(0deg); }
+  50% { transform: translate3d(45px, 50vh, 0) rotate(180deg); }
+  100% { transform: translate3d(-25px, 110vh, 0) rotate(360deg); }
+}
+
+/* Полоска прогресса: блеск и грибочек на конце */
+.progress-container { position: relative; overflow: visible; }
+.progress-bar { position: relative; overflow: hidden; border-radius: 3px; }
+.progress-bar::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); animation: barShine 1.8s infinite;
+  background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,0.6) 50%, transparent 70%); }
+@keyframes barShine { to { transform: translateX(100%); } }
+.progress-mush { position: absolute; top: 50%; left: 0; font-size: 15px; line-height: 1; transform: translate(-50%, -55%); transition: left 0.3s ease-out; pointer-events: none; }
+
+/* Грибочки вырастают из земли волной */
+.mushroom { animation: growUp 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both; transform-origin: 50% 100%; }
+@keyframes growUp {
+  0% { transform: scale(0.4, 0); opacity: 0; }
+  60% { transform: scale(1.08, 1.12); opacity: 1; }
+  100% { transform: scale(1, 1); opacity: 1; }
+}
+
+/* Лесные зверьки */
+.critter { position: fixed; bottom: 125px; font-size: 46px; line-height: 1; z-index: 90; pointer-events: none; transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.critter.left { left: 0; transform: translateX(-120%); }
+.critter.right { right: 0; transform: translateX(120%); }
+.critter.show { transform: translateX(0); }
+.critter .bubble { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); white-space: nowrap; background: #fff; color: #1b4332; font-size: 0.8rem; font-weight: 800; padding: 3px 9px; border-radius: 10px; }
+
+/* Победа: звёзды падают сверху и «стукаются» на место */
+.star { animation: starDrop 0.9s ease-in forwards; }
+@keyframes starDrop {
+  0% { transform: translateY(-260px) rotate(-200deg); opacity: 0; }
+  50% { transform: translateY(0) rotate(0); opacity: 1; }
+  66% { transform: translateY(-24px); }
+  80% { transform: translateY(0); }
+  90% { transform: translateY(-8px); }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* Зверьки: смотрят внутрь экрана, облачко всегда целиком на экране */
+.critter { font-size: 54px; }
+.critter.left { --f: -1; }
+.critter.right { --f: 1; }
+.critter .animal { display: inline-block; transform: scaleX(var(--f)); filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
+.critter.show .animal { animation: critterWiggle 0.5s 0.4s 3; }
+@keyframes critterWiggle {
+  0%, 100% { transform: scaleX(var(--f)) rotate(0deg); }
+  30% { transform: scaleX(var(--f)) rotate(-8deg); }
+  70% { transform: scaleX(var(--f)) rotate(8deg); }
+}
+.critter .bubble { left: auto; right: auto; margin-bottom: 8px; max-width: calc(100vw - 24px); padding: 5px 12px; border-radius: 14px; border: 2px solid #ffb703; box-shadow: 0 4px 12px rgba(0,0,0,0.45); font-size: 0.85rem; transform: scale(0); transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.critter.left .bubble { left: 8px; transform-origin: 24px 100%; }
+.critter.right .bubble { right: 8px; transform-origin: calc(100% - 24px) 100%; }
+.critter.show .bubble { transform: scale(1); transition-delay: 0.35s; }
+.critter .bubble::after { content: ""; position: absolute; top: 100%; width: 0; height: 0; border: 7px solid transparent; border-top-color: #fff; }
+.critter.left .bubble::after { left: 18px; }
+.critter.right .bubble::after { right: 18px; }
