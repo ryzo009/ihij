@@ -1,78 +1,138 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Грибной тренажер: Род и склонение существительных</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Лесная Поляна — Склонение существительных</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Подключаем библиотеку конфетти для победной анимации -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </head>
 <body>
 
-  <!-- Лесной фон со светлячками -->
-  <div class="forest-bg">
-    <div class="sunbeams"></div>
-    <div class="firefly"></div>
-    <div class="firefly"></div>
-    <div class="firefly"></div>
+  <!-- Стартовая заставка -->
+  <div id="start-screen" class="start-screen">
+    <div class="start-card">
+      <div class="start-header-glow"></div>
+      <h2>🍄 Лесная Поляна</h2>
+      <p class="start-subtitle">Склонение имён существительных</p>
+      <div class="level-row">
+        <button class="level-btn" data-level="easy">Лёгкий<small>20 слов</small></button>
+        <button class="level-btn" data-level="normal">Обычный<small>40 слов</small></button>
+        <button class="level-btn" data-level="hard">Сложный<small>все слова</small></button>
+      </div>
+      <p id="record-line" class="record-line"></p>
+      
+      <button id="start-btn" class="start-btn">Начать игру</button>
+      <div class="tools-row">
+        <button id="words-btn" class="tool-btn">✏️ Свои слова</button>
+        <button class="tool-btn sound-toggle">🔊</button>
+      </div>
+
+      <!-- Информационный блок с фиксированной высотой и аккуратным скроллом внутри -->
+      <div class="rule-box">
+        <h3>📖 Шпаргалка: Как отличить склонения?</h3>
+        <p class="rule-intro">Изменение существительных по падежам и числам:</p>
+        
+        <div class="rule-col col-1">
+          <span class="badge-1">1-е склонение</span>
+          <p>Существительные <strong>мужского</strong> и <strong>женского</strong> рода с окончаниями <strong>-а</strong> / <strong>-я</strong>.<br><em>(Например: маш<strong>а</strong>, земл<strong>я</strong>, пап<strong>а</strong>)</em></p>
+        </div>
+
+        <div class="rule-col col-2">
+          <span class="badge-2">2-е склонение</span>
+          <p>Существительные <strong>мужского</strong> рода с нулевым окончанием и <strong>среднего</strong> рода с окончаниями <strong>-о</strong> / <strong>-е</strong>.<br><em>(Например: стол[ ], окн<strong>о</strong>, пол<strong>е</strong>)</em></p>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- Шапка -->
+  <!-- Фоновый лес -->
+  <div class="forest-bg">
+    <div class="sunbeams"></div>
+    <div class="firefly" style="top: 20%; left: 10%; animation-delay: 0s;"></div>
+    <div class="firefly" style="top: 50%; left: 80%; animation-delay: 2s;"></div>
+    <div class="firefly" style="top: 70%; left: 30%; animation-delay: 4s;"></div>
+  </div>
+
+  <!-- Верхняя шапка -->
   <header class="app-header">
-    <h1>🌲 Лесная Поляна: Склонение Существительных 🌲</h1>
+    <h1>Лесная поляна, склонение имён существительных</h1>
     <div class="progress-container">
       <div id="progress-bar" class="progress-bar"></div>
+      <span id="progress-mush" class="progress-mush">🍄</span>
+    </div>
+    <div class="stats-row">
+      <span id="timer">⏱ 0:00</span>
+      <span id="errors">❌ 0</span>
+      <button class="tool-btn sound-toggle">🔊</button>
+      <button id="menu-btn" class="tool-btn">☰ Меню</button>
     </div>
   </header>
 
-  <!-- Игровое поле -->
+  <!-- Игровое поле для грибочков -->
   <main id="game-field" class="game-field"></main>
 
-  <!-- Ошибка -->
-  <div id="error-cross" class="error-cross hidden">✖</div>
+  <!-- Корзины внизу -->
+  <footer class="baskets-container">
+    <!-- Корзина 1-го склонения -->
+    <div id="basket-1" class="basket-item fem-basket">
+      <div id="score-1" class="basket-counter">0</div>
+      <div class="basket-handle"></div>
+      <div class="basket-body">
+        <div class="basket-front-wall">
+          <div class="basket-rim"></div>
+          <span class="basket-label">1-е склонение</span>
+        </div>
+      </div>
+    </div>
 
-  <!-- Победа -->
-  <div id="victory-modal" class="modal hidden">
-    <div class="modal-content">
-      <h2>🎉 Великолепно! 🎉</h2>
-      <p>Вы успешно отсортировали все грибы по корзинкам!</p>
-      <button id="restart-btn" onclick="initGame()">Сыграть еще раз</button>
+    <!-- Корзина 2-го склонения -->
+    <div id="basket-2" class="basket-item masc-basket">
+      <div id="score-2" class="basket-counter">0</div>
+      <div class="basket-handle"></div>
+      <div class="basket-body">
+        <div class="basket-front-wall">
+          <div class="basket-rim"></div>
+          <span class="basket-label">2-е склонение</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Индикатор ошибки (крестик) -->
+  <div id="error-cross" class="error-cross hidden">❌</div>
+
+  <!-- Модальное окно победы -->
+  <div id="victory-modal" class="modal victory hidden">
+    <div class="victory-card">
+      <div class="victory-badge">🏆</div>
+      <h2>Победа!</h2>
+      <p id="victory-msg" class="victory-msg"></p>
+      <div id="stars" class="stars"></div>
+      <div class="stat-chips">
+        <div class="chip"><span>⏱</span><b id="res-time">0:00</b><small>время</small></div>
+        <div class="chip"><span>❌</span><b id="res-errors">0</b><small>ошибок</small></div>
+        <div class="chip"><span>🍄</span><b id="res-words">0</b><small>слов</small></div>
+      </div>
+      <p id="new-record" class="new-record hidden"></p>
+      <div class="result-actions">
+        <button class="btn-primary" onclick="initGame()">🔄 Играть снова</button>
+        <button id="to-menu-btn" class="btn-ghost">☰ В меню</button>
+      </div>
     </div>
   </div>
 
-  <!-- Корзины -->
-  <div class="baskets-container">
-    <div id="basket-1" class="basket-item fem-basket" data-basket="1">
-      <div class="basket-counter" id="score-1">0</div>
-      <div class="basket-handle"></div>
-      
-      <!-- Задняя часть корзины -->
-      <div class="basket-body">
-        <div class="basket-weave"></div>
-      </div>
-
-      <!-- Передняя часть (бортик и плашка), за которую погружается гриб -->
-      <div class="basket-front-wall">
-        <div class="basket-weave"></div>
-        <div class="basket-rim"></div>
-        <div class="basket-label">1-е склонение</div>
-      </div>
-    </div>
-
-    <div id="basket-2" class="basket-item masc-basket" data-basket="2">
-      <div class="basket-counter" id="score-2">0</div>
-      <div class="basket-handle"></div>
-      
-      <!-- Задняя часть корзины -->
-      <div class="basket-body">
-        <div class="basket-weave"></div>
-      </div>
-
-      <!-- Передняя часть (бортик и плашка), за которую погружается гриб -->
-      <div class="basket-front-wall">
-        <div class="basket-weave"></div>
-        <div class="basket-rim"></div>
-        <div class="basket-label">2-е склонение</div>
+  <div id="words-modal" class="modal words-modal hidden">
+    <div class="modal-content">
+      <h2>✏️ Свои слова</h2>
+      <p>Слова через запятую или с новой строки.</p>
+      <label for="words-1">1-е склонение</label><textarea id="words-1"></textarea>
+      <label for="words-2">2-е склонение</label><textarea id="words-2"></textarea>
+      <div class="words-actions">
+        <button id="words-save">Сохранить</button>
+        <button id="words-reset" class="alt-btn">Сбросить</button>
+        <button id="words-close" class="alt-btn">Закрыть</button>
       </div>
     </div>
   </div>
